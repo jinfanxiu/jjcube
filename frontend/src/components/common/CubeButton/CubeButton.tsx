@@ -11,8 +11,9 @@ type CubeButtonProps = {
 };
 
 const CubeButton: FC<CubeButtonProps> = ({ icon, label, subtitle, colorKey, path }) => {
+    // h-36 대신 aspect-square를 사용하여 너비에 맞춰 높이를 조정하고, min-h-36을 추가하여 최소 높이를 보장
     const base =
-        'relative group block overflow-hidden rounded-2xl h-44 w-44 sm:h-48 sm:w-48 shadow-xl hover:shadow-2xl transition-transform hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70';
+        'relative group block overflow-hidden rounded-2xl w-full aspect-square min-h-[9rem] shadow-lg hover:shadow-xl transition-transform hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70';
 
     const colorMap: Record<string, string> = {
         sky: 'bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500',
@@ -29,10 +30,10 @@ const CubeButton: FC<CubeButtonProps> = ({ icon, label, subtitle, colorKey, path
         <>
             <div className="pointer-events-none absolute inset-0 opacity-60 [background:radial-gradient(120%_100%_at_50%_-20%,rgba(225,225,225,.25),transparent_60%)]" />
             <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition [background:conic-gradient(from_180deg_at_50%_50%,rgba(225,225,225,.0),rgba(225,225,225,.25),rgba(225,225,225,.0))] blur-xl" />
-            <div className="relative z-10 h-full w-full flex flex-col items-center justify-center">
-                <i className={`bx ${icon} text-white text-5xl mb-3`} />
-                <div className="text-white font-semibold text-base">{label}</div>
-                <div className="text-white/85 text-sm mt-1">{subtitle}</div>
+            <div className="relative z-10 h-full w-full flex flex-col items-center justify-center p-2 text-center">
+                <i className={`bx ${icon} text-white text-4xl mb-2`} />
+                <div className="text-white font-semibold text-base leading-tight">{label}</div>
+                <div className="text-white/85 text-xs mt-1 leading-snug">{subtitle}</div>
             </div>
         </>
     );
