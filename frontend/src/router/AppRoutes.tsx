@@ -3,72 +3,85 @@ import MainLayout from '../layouts/MainLayout';
 import ToolboxPage from '../pages/toolbox/ToolboxPage';
 import LoginPage from '../pages/auth/LoginPage';
 import PendingApprovalPage from '../pages/auth/PendingApprovalPage';
-import AdminPage from '../pages/admin/AdminPage'; // 새로 만든 AdminPage를 import 합니다.
+import AdminPage from '../pages/admin/AdminPage';
 import { useAuth } from '../context/AuthProvider';
 
 const AppRoutes = () => {
     const { session, profile, loading } = useAuth();
 
     if (loading) {
-        return <div>Loading Application...</div>;
+        return <div className="flex-grow flex items-center justify-center">Loading Application...</div>;
     }
 
-    // --- 사용자가 로그인한 경우의 로직 ---
-    if (session) {
-        // 1. 관리자(admin)인 경우
-        if (profile?.role === 'admin') {
-            return (
-                <Routes>
-                    <Route path="/" element={<MainLayout />}>
-                        <Route index element={<Navigate to="/admin" replace />} />
-                        <Route path="admin" element={<AdminPage />} />
-                    </Route>
-                    {/* 관리자는 다른 모든 경로 접근 시 /admin으로 리디렉션됩니다. */}
-                    <Route path="*" element={<Navigate to="/admin" replace />} />
-                </Routes>
-            );
-        }
-
-        // 2. 승인된 일반 회원(member)인 경우
-        if (profile?.is_approved) {
-            return (
-                <Routes>
-                    <Route path="/" element={<MainLayout />}>
-                        <Route index element={<Navigate to="/toolbox" replace />} />
-                        <Route path="toolbox" element={<ToolboxPage />} />
-                    </Route>
-                    {/* 승인된 회원은 승인 대기 페이지나 로그인 페이지에 접근할 수 없습니다. */}
-                    <Route path="/pending-approval" element={<Navigate to="/toolbox" replace />} />
-                    <Route path="/login" element={<Navigate to="/toolbox" replace />} />
-                    <Route path="*" element={<Navigate to="/toolbox" replace />} />
-                </Routes>
-            );
-        }
-
-        // 3. 로그인은 했지만, 아직 승인되지 않은 경우
+    // 로그인하지 않은 사용자
+    if (!session) {
         return (
             <Routes>
-                <Route path="/" element={<MainLayout />}>
-                    <Route index element={<Navigate to="/pending-approval" replace />} />
-                    <Route path="pending-approval" element={<PendingApprovalPage />} />
+                <Route element={<MainLayout />}>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="*" element={<Navigate to="/login" replace />} />
                 </Route>
-                {/* 승인 대기자는 toolbox 등 다른 서비스 페이지에 접근할 수 없습니다. */}
-                <Route path="/toolbox" element={<Navigate to="/pending-approval" replace />} />
-                <Route path="*" element={<Navigate to="/pending-approval" replace />} />
             </Routes>
         );
     }
 
-    // --- 사용자가 로그인하지 않은 경우의 로직 ---
-    return (
-        <Routes>
-            <Route path="/" element={<MainLayout />}>
-                <Route index element={<Navigate to="/login" replace />} />
-                <Route path="login" element={<LoginPage />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-    );
+    // 로그인한 사용자 (프로필 정보 로딩 중일 수 있음)
+    if (!profile) {
+        // 프로필을 기다리는 동안 로딩 상태를 보여주거나,
+        // 혹은 승인 대기 페이지로 잠시 보낼 수 있습니다.
+        // 여기서는 로딩을 보여주는 것이 더 나은 사용자 경험을 제공합니다.
+        return <div className="flex-grow flex items-center justify-center">Loading Profile...</div>;
+    }
+
+    // 관리자
+    if (profile.role === 'admin') {
+        return (
+            <Routes>
+                <Route element={<MainLayout />}>
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/toolbox" element={<ToolboxPage />} />
+                    {/* 관리자의 기본 페이지는 /admin 입니다. */}
+                    <Route path="/" element={<Navigate to="/admin" replace />} />
+                    {/* 정의되지 않은 모든 경로는 /admin 으로 보냅니다. */}
+                    <Route path="*" element={<Navigate to="/admin" replace />} />
+                </Route>
+            </Routes>
+        );
+    }
+
+    // 일반 회원
+    if (profile.role === 'member') {
+        // 승인된 회원
+        if (profile.is_approved) {
+            return (
+                <Routes>
+                    <Route element={<MainLayout />}>
+                        <Route path="/toolbox" element={<ToolboxPage />} />
+                        {/* 승인된 회원의 기본 페이지는 /toolbox 입니다. */}
+                        <Route path="/" element={<Navigate to="/toolbox" replace />} />
+                        {/* 정의되지 않은 모든 경로는 /toolbox 로 보냅니다. */}
+                        <Route path="*" element={<Navigate to="/toolbox" replace />} />
+                    </Route>
+                </Routes>
+            );
+        }
+        // 승인 대기 회원
+        else {
+            return (
+                <Routes>
+                    <Route element={<MainLayout />}>
+                        <Route path="/pending-approval" element={<PendingApprovalPage />} />
+                        {/* 승인 대기 회원의 기본 페이지는 /pending-approval 입니다. */}
+                        <Route path="/" element={<Navigate to="/pending-approval" replace />} />
+                        {/* 정의되지 않은 모든 경로는 /pending-approval 로 보냅니다. */}
+                        <Route path="*" element={<Navigate to="/pending-approval" replace />} />
+                    </Route>
+                </Routes>
+            );
+        }
+    }
+
+    return <Navigate to="/login" replace />;
 };
 
 export default AppRoutes;

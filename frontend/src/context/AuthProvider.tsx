@@ -6,6 +6,8 @@ import { supabase } from '../supabaseClient';
 type Profile = {
     role: 'admin' | 'member';
     is_approved: boolean;
+    nickname: string | null;
+    email?: string | null;
 };
 
 type AuthContextType = {
@@ -19,75 +21,64 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [session, setSession] = useState<Session | null>(null);
     const [user, setUser] = useState<User | null>(null);
+    const [session, setSession] = useState<Session | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // 1. Session and User state management
     useEffect(() => {
-        let isActive = true;
+        // Get the initial session right away
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+            setUser(session?.user ?? null);
+            // We set loading to false here initially, but the profile loading might take longer
+        });
 
-        const fetchSessionAndProfile = async () => {
-            try {
-                const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
-
-                if (!isActive) return;
-
-                if (sessionError) throw sessionError;
-
-                setSession(currentSession);
-                setUser(currentSession?.user ?? null);
-
-                if (currentSession?.user) {
-                    const { data: userProfile, error } = await supabase
-                        .from('profiles')
-                        .select('role, is_approved')
-                        .eq('id', currentSession.user.id)
-                        .single();
-
-                    if (!isActive) return;
-
-                    if (error && error.code !== 'PGRST116') throw error;
-
-                    setProfile(userProfile ?? null);
-                } else {
-                    setProfile(null);
-                }
-            } catch (error) {
-                if (isActive) {
-                    console.error('Error fetching initial data:', error);
-                    setProfile(null);
-                }
-            } finally {
-                if (isActive) {
-                    setLoading(false);
-                }
-            }
-        };
-
-        fetchSessionAndProfile();
-
-        const { data: authListener } = supabase.auth.onAuthStateChange(
+        // Listen for future changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
             (_event, session) => {
-                if (isActive) {
-                    setSession(session);
-                    setUser(session?.user ?? null);
-                    // This listener is simpler, so profile updates can be handled separately if needed
-                }
+                setSession(session);
+                setUser(session?.user ?? null);
             }
         );
 
         return () => {
-            isActive = false;
-            authListener.subscription.unsubscribe();
+            subscription.unsubscribe();
         };
     }, []);
 
+    // 2. Profile state management, dependent on the user
+    useEffect(() => {
+        // If there's no user, there's no profile to fetch.
+        if (!user) {
+            setProfile(null);
+            setLoading(false); // No user, so we are done loading.
+            return;
+        }
+
+        // User exists, so start loading the profile.
+        setLoading(true);
+        supabase
+            .from('profiles')
+            .select('role, is_approved, nickname, email')
+            .eq('id', user.id)
+            .single()
+            .then(({ data, error }) => {
+                if (error && error.code !== 'PGRST116') {
+                    console.error("Error fetching profile:", error.message);
+                    setProfile(null);
+                } else {
+                    setProfile(data);
+                }
+                // Whether profile was found or not, we are done loading.
+                setLoading(false);
+            });
+
+    }, [user]); // This effect runs whenever the user object changes.
+
     const logout = async () => {
         await supabase.auth.signOut();
-        setSession(null);
-        setUser(null);
-        setProfile(null);
     };
 
     const value = {
