@@ -4,6 +4,8 @@ import ToolboxPage from '../pages/toolbox/ToolboxPage';
 import LoginPage from '../pages/auth/LoginPage';
 import PendingApprovalPage from '../pages/auth/PendingApprovalPage';
 import AdminPage from '../pages/admin/AdminPage';
+import FeedbackPage from '../pages/feedback/FeedbackPage'; // 추가
+import NotFoundPage from '../pages/error/NotFoundPage';   // 추가
 import { useAuth } from '../context/AuthProvider';
 
 const AppRoutes = () => {
@@ -19,17 +21,15 @@ const AppRoutes = () => {
             <Routes>
                 <Route element={<MainLayout />}>
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="*" element={<Navigate to="/login" replace />} />
+                    <Route path="/feedback" element={<FeedbackPage />} />
+                    <Route path="/" element={<Navigate to="/login" replace />} />
+                    <Route path="*" element={<NotFoundPage />} />
                 </Route>
             </Routes>
         );
     }
 
-    // 로그인한 사용자 (프로필 정보 로딩 중일 수 있음)
     if (!profile) {
-        // 프로필을 기다리는 동안 로딩 상태를 보여주거나,
-        // 혹은 승인 대기 페이지로 잠시 보낼 수 있습니다.
-        // 여기서는 로딩을 보여주는 것이 더 나은 사용자 경험을 제공합니다.
         return <div className="flex-grow flex items-center justify-center">Loading Profile...</div>;
     }
 
@@ -40,10 +40,9 @@ const AppRoutes = () => {
                 <Route element={<MainLayout />}>
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/toolbox" element={<ToolboxPage />} />
-                    {/* 관리자의 기본 페이지는 /admin 입니다. */}
+                    <Route path="/feedback" element={<FeedbackPage />} />
                     <Route path="/" element={<Navigate to="/admin" replace />} />
-                    {/* 정의되지 않은 모든 경로는 /admin 으로 보냅니다. */}
-                    <Route path="*" element={<Navigate to="/admin" replace />} />
+                    <Route path="*" element={<NotFoundPage />} />
                 </Route>
             </Routes>
         );
@@ -57,10 +56,9 @@ const AppRoutes = () => {
                 <Routes>
                     <Route element={<MainLayout />}>
                         <Route path="/toolbox" element={<ToolboxPage />} />
-                        {/* 승인된 회원의 기본 페이지는 /toolbox 입니다. */}
+                        <Route path="/feedback" element={<FeedbackPage />} />
                         <Route path="/" element={<Navigate to="/toolbox" replace />} />
-                        {/* 정의되지 않은 모든 경로는 /toolbox 로 보냅니다. */}
-                        <Route path="*" element={<Navigate to="/toolbox" replace />} />
+                        <Route path="*" element={<NotFoundPage />} />
                     </Route>
                 </Routes>
             );
@@ -71,10 +69,9 @@ const AppRoutes = () => {
                 <Routes>
                     <Route element={<MainLayout />}>
                         <Route path="/pending-approval" element={<PendingApprovalPage />} />
-                        {/* 승인 대기 회원의 기본 페이지는 /pending-approval 입니다. */}
+                        <Route path="/feedback" element={<FeedbackPage />} />
                         <Route path="/" element={<Navigate to="/pending-approval" replace />} />
-                        {/* 정의되지 않은 모든 경로는 /pending-approval 로 보냅니다. */}
-                        <Route path="*" element={<Navigate to="/pending-approval" replace />} />
+                        <Route path="*" element={<NotFoundPage />} />
                     </Route>
                 </Routes>
             );

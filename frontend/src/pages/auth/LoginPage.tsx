@@ -2,10 +2,13 @@ import { supabase } from '../../supabaseClient';
 
 const LoginPage = () => {
     const handleGoogleLogin = async () => {
+        // Vercel 환경 변수를 우선적으로 사용하고, 없으면 현재 창의 주소를 사용합니다.
+        const redirectTo = import.meta.env.VITE_SITE_URL || window.location.origin;
+
         await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin,
+                redirectTo: redirectTo,
             }
         });
     };
