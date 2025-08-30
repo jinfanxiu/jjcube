@@ -271,3 +271,13 @@ sketch
 .vercel
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij,react,vercel,node
+
+# Supabase
+.env
+supabase/.temp
+
+# Node
+node_modules
+
+# IDE
+.idea
