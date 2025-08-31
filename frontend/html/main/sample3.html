@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UX / UI 대시보드 – 큐브 네비게이션</title>
+
+    <!-- Google Fonts (Korean) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        /* Tailwind on-the-fly config */
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'ui-sans-serif', 'system-ui'],
+                    },
+                    colors: {
+                        ui: {
+                            50:  '#f5f7ff',
+                            100: '#e9edff',
+                            200: '#cfd8ff',
+                            300: '#b1beff',
+                            400: '#8c9cff',
+                            500: '#6272ff',
+                            600: '#4555e6',
+                            700: '#313db4',
+                            800: '#242d86',
+                            900: '#1b2363'
+                        },
+                        candy: {
+                            500: '#ff5da2',
+                            600: '#ff3f8f'
+                        }
+                    },
+                    boxShadow: {
+                        soft: '0 10px 30px rgba(20, 20, 43, .12)',
+                        glow: '0 10px 40px rgba(98, 114, 255, .45)',
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- Remix Icon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+
+    <style>
+        :root{
+            --rad: 22px;
+        }
+        html, body { height: 100%; }
+        body{
+            background:
+                    radial-gradient(1200px 600px at 85% -10%, #ffd1e6 0%, rgba(255,210,230,0) 60%),
+                    radial-gradient(1000px 600px at -10% 0%, #c7d2ff 0%, rgba(199,210,255,0) 55%),
+                    linear-gradient(135deg, #0f172a 0%, #111827 100%);
+        }
+
+        /* Glass card (hero phones & header) */
+        .glass {
+            background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.08));
+            border: 1px solid rgba(255,255,255,.24);
+            box-shadow: 0 8px 32px rgba(2, 8, 23, .45), inset 0 1px 0 rgba(255,255,255,.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        /* Cube button base */
+        .cube {
+            position: relative;
+            aspect-ratio: 1 / 1;              /* 정사각형 유지 */
+            border-radius: var(--rad);
+            border: 1px solid rgba(255,255,255,.22);
+            background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+            transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+            box-shadow:
+                    0 10px 24px rgba(2, 8, 23, .35),
+                    inset 0 1px 0 rgba(255,255,255,.15);
+            overflow: hidden;
+            isolation: isolate;
+        }
+        .cube:before{
+            /* 상단 면 하이라이트 (큐브 느낌) */
+            content: "";
+            position: absolute; inset: 0;
+            background:
+                    radial-gradient(120% 100% at 50% -20%, rgba(255,255,255,.35), transparent 55%),
+                    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+            z-index: 0;
+            pointer-events: none;
+        }
+        .cube:hover{
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(255,255,255,.45);
+            box-shadow: 0 16px 40px rgba(98,114,255,.45);
+        }
+        .cube:active{
+            transform: translateY(-2px) scale(0.995);
+        }
+
+        /* Soft gradient ring on hover */
+        .cube .ring {
+            position: absolute; inset: -2px;
+            border-radius: inherit;
+            background: conic-gradient(from 180deg at 50% 50%, rgba(98,114,255,.0), rgba(98,114,255,.55), rgba(255,93,162,.5), rgba(98,114,255,.0));
+            filter: blur(18px); opacity: 0; transition: opacity .35s;
+            z-index: -1;
+        }
+        .cube:hover .ring { opacity: .9; }
+
+        /* Badge */
+        .badge {
+            position: absolute; top: 12px; right: 12px;
+            background: linear-gradient(180deg, #22c55e, #16a34a);
+            color: white; font-size: 11px; line-height: 1;
+            padding: 6px 8px; border-radius: 9999px;
+            box-shadow: 0 6px 14px rgba(34,197,94,.35);
+        }
+
+        /* Simple tooltip for actions */
+        .tooltip{
+            position: absolute; inset-inline-start: 50%; inset-block-end: -8px;
+            transform: translate(-50%, 100%);
+            background: rgba(17,24,39,.92); color: #e5e7eb;
+            padding: 6px 8px; border-radius: 8px; font-size: 12px;
+            border: 1px solid rgba(255,255,255,.08);
+            opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+            white-space: nowrap;
+        }
+        .has-tooltip:hover .tooltip{
+            opacity: 1; transform: translate(-50%, 120%);
+        }
+
+        /* Footer link underline effect */
+        .uline{
+            background: linear-gradient(currentColor, currentColor) left bottom/0 2px no-repeat;
+            transition: background-size .25s ease;
+        }
+        .uline:hover{ background-size: 100% 2px; }
+
+        /* Mobile bottom safe space */
+        @supports(padding:max(env(safe-area-inset-bottom),0px)){
+            footer{ padding-bottom: max(env(safe-area-inset-bottom), 24px) }
+            header{ padding-top: max(env(safe-area-inset-top), 12px) }
+        }
+    </style>
+</head>
+
+<body class="font-sans text-slate-100 selection:bg-ui-500/30 selection:text-white">
+<!-- Header (로그인 상태) -->
+<header class="glass sticky top-0 z-40">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+            <!-- Left: Brand -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="h-9 w-9 rounded-2xl bg-gradient-to-br from-ui-500 to-candy-600 grid place-items-center shadow-glow">
+                    <i class="ri-shape-2-line text-white text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-base font-bold tracking-tight">UX / UI</p>
+                    <p class="text-[11px] text-slate-300/80 -mt-0.5">모바일 앱 경험 디자인</p>
+                </div>
+            </a>
+
+            <!-- Center: Search (md+) -->
+            <div class="hidden md:flex flex-1 justify-center px-6">
+                <label class="relative w-full max-w-xl">
+                    <i class="ri-search-2-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="search" placeholder="무엇을 찾고 있나요?"
+                           class="w-full rounded-xl bg-white/5 border border-white/10 pl-10 pr-10 h-10 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-ui-500/60 focus:border-transparent"/>
+                    <button class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 h-7 rounded-lg text-[12px] bg-ui-600 hover:bg-ui-500 transition">검색</button>
+                </label>
+            </div>
+
+            <!-- Right: User (로그인됨) -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <button aria-label="알림" class="relative has-tooltip p-2 rounded-xl hover:bg-white/10">
+                    <i class="ri-notification-3-line text-xl"></i>
+                    <span class="absolute -top-0.5 -right-0.5 bg-rose-500 text-[10px] px-1.5 py-0.5 rounded-full">3</span>
+                    <span class="tooltip">알림</span>
+                </button>
+                <button aria-label="메시지" class="has-tooltip p-2 rounded-xl hover:bg-white/10">
+                    <i class="ri-chat-1-line text-xl"></i>
+                    <span class="tooltip">메시지</span>
+                </button>
+
+                <div class="relative">
+                    <button id="userBtn" class="flex items-center gap-2 rounded-xl hover:bg-white/10 px-2 py-1.5">
+                        <img alt="프로필" src="https://i.pravatar.cc/80?img=13" class="h-8 w-8 rounded-xl object-cover"/>
+                        <div class="hidden sm:block text-left">
+                            <p class="leading-4 text-sm font-semibold">이지은</p>
+                            <p class="text-[11px] text-slate-300/80 leading-4">Pro · 온라인</p>
+                        </div>
+                        <i class="ri-arrow-down-s-line text-lg"></i>
+                    </button>
+                    <!-- dropdown -->
+                    <div id="userMenu" class="hidden absolute right-0 mt-2 w-52 glass rounded-2xl p-2">
+                        <a class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/10" href="#"><i class="ri-user-3-line"></i>프로필</a>
+                        <a class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/10" href="#"><i class="ri-settings-3-line"></i>설정</a>
+                        <a class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/10" href="#"><i class="ri-logout-circle-r-line"></i>로그아웃</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Hero: visual hint from attached mock (폰 + 떠있는 카드 느낌) -->
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12">
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="order-2 md:order-1">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
+                현대적이고 세련된 <span class="text-transparent bg-clip-text bg-gradient-to-r from-ui-400 via-white to-candy-600">큐브 네비게이션</span> 대시보드
+            </h1>
+            <p class="mt-4 text-slate-300/90">
+                로그인된 사용자를 위한 빠른 접근. 각 기능은 큐브 형태로 배치되어 있으며, 아이콘과 텍스트로 직관적으로 구성되었습니다.
+            </p>
+            <div class="mt-6 flex items-center gap-3">
+                <button class="rounded-2xl bg-ui-600 hover:bg-ui-500 px-5 py-3 text-sm font-semibold shadow-soft">
+                    <i class="ri-flashlight-line mr-1.5"></i> 빠른 시작
+                </button>
+                <button id="modeBtn" class="rounded-2xl border border-white/15 px-5 py-3 text-sm font-semibold hover:bg-white/10">
+                    <i class="ri-contrast-2-line mr-1.5"></i> 다크/라이트 전환
+                </button>
+            </div>
+        </div>
+
+        <!-- Phone mock (glass) -->
+        <div class="order-1 md:order-2 relative">
+            <div class="absolute -top-6 -left-6 w-24 h-24 rounded-3xl blur-3xl opacity-80 bg-ui-500/40"></div>
+            <div class="absolute -bottom-8 -right-4 w-28 h-28 rounded-3xl blur-3xl opacity-70 bg-candy-600/40"></div>
+
+            <div class="glass rounded-[28px] p-4 w-[86%] sm:w-[72%] rotate-[-8deg] translate-y-2 shadow-glow">
+                <div class="rounded-[22px] overflow-hidden border border-white/15">
+                    <img src="https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1400&auto=format&fit=crop" alt="" class="h-44 w-full object-cover">
+                    <div class="p-4">
+                        <p class="text-sm font-bold">모바일 앱</p>
+                        <p class="text-xs text-slate-400">UX 샘플 스크린</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass rounded-[28px] p-4 w-[86%] sm:w-[72%] rotate-[8deg] ml-auto -mt-6 shadow-glow">
+                <div class="rounded-[22px] overflow-hidden border border-white/15">
+                    <img src="https://images.unsplash.com/photo-1521747116042-5a810fda9664?q=80&w=1400&auto=format&fit=crop" alt="" class="h-44 w-full object-cover">
+                    <div class="p-4">
+                        <p class="text-sm font-bold">UI 컴포넌트</p>
+                        <p class="text-xs text-slate-400">대시보드 요소</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Cube Navigation Grid -->
+<main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    <div class="mb-5 flex items-center justify-between">
+        <h2 class="text-xl sm:text-2xl font-extrabold">기능 바로가기</h2>
+        <div class="hidden sm:flex items-center gap-2 text-sm">
+            <button class="px-3 py-1.5 rounded-xl border border-white/15 hover:bg-white/10"><i class="ri-layout-grid-line mr-1"></i>정렬</button>
+            <button class="px-3 py-1.5 rounded-xl border border-white/15 hover:bg-white/10"><i class="ri-filter-3-line mr-1"></i>필터</button>
+        </div>
+    </div>
+
+    <!-- Responsive grid: mobile 2, tablet 3~4, desktop 5 -->
+    <div class="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
+        <!-- Cube item template (아이콘 크고, 아래 기능명) -->
+        <!-- 글쓰기 -->
+        <a href="#write" class="cube group relative">
+            <span class="ring"></span>
+            <span class="badge">NEW</span>
+            <div class="absolute inset-0 grid place-items-center text-center p-3">
+                <i class="ri-pencil-line text-4xl sm:text-5xl mb-2 group-hover:scale-105 transition"></i>
+                <div>
+                    <p class="text-sm sm:text-base font-bold">글쓰기</p>
+                    <p class="text-[11px] text-slate-300/80">아이디어 기록</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- 통계 -->
+        <a href="#stats" class="cube group relative">
+            <span class="ring"></span>
+            <div class="absolute inset-0 grid place-items-center text-center p-3">
+                <i class="ri-bar-chart-2-line text-4xl sm:text-5xl mb-2"></i>
+                <div>
+                    <p class="text-sm sm:text-base font-bold">통계</p>
+                    <p class="text-[11px] text-slate-300/80">성과 추적</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- 다이어그램 -->
+        <a href="#diagram" class="cube group relative">
+            <span class="ring"></span>
+            <div class="absolute inset-0 grid place-items-center text-center p-3">
+                <i class="ri-node-tree text-4xl sm:text-5xl mb-2"></i>
+                <div>
+                    <p class="text-sm sm:text-base font-bold">다이어그램</p>
+                    <p class="text-[11px] text-slate-300/80">흐름 설계</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- 갤러리 -->
+        <a href="#gallery" class="cube group relative">
+            <span class="ring"></span>
+            <div class="absolute inset-0 grid place-items-center text-center p-3">
+                <i class="ri-image-2-line text-4xl sm:text-5xl mb-2"></i>
+                <div>
+                    <p class="text-sm sm:text-base font-bold">갤러리</p>
+                    <p class="text-[11px] text-slate-300/80">디자인 보드</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- 설정 -->
+        <a href="#settings" class="cube group relative">
+            <span class="ring"></span>
+            <div class="absolute inset-0 grid place-items-center text-center p-3">
+                <i class="ri-settings-5-line text-4xl sm:text-5xl mb-2"></i>
+                <div>
+                    <p class="text-sm sm:text-base font-bold">설정</p>
+                    <p class="text-[11px] text-slate-300/80">환경 구성</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- 사용자 -->
+        <a href="#users" class="cube group relative">
+            <span class="ring"></span>
+            <div class="absolute inset-0 grid place-items-center text-center p-3">
+                <i class="ri-team-line text-4xl sm:text-5xl mb-2"></i>
+                <div>
+                    <p class="text-sm sm:text-base font-bold">사용자</p>
+                    <p class="text-[11px] text-slate-300/80">멤버 관리</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- 알림 -->
+        <a href="#alerts" class="cube group relative">
+            <span class="ring"></span>
+            <div class="absolute inset-0 grid place-items-center text-center p-3">
+                <i class="ri-notification-badge-line text-4xl sm:text-5xl mb-2"></i>
+                <div>
+                    <p class="text-sm sm:text-base font-bold">알림</p>
+                    <p class="text-[11px] text-slate-300/80">상태 모니터링</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- 파일 -->
+        <a href="#files" class="cube group relative">
+            <span class="ring"></span>
+            <div class="absolute inset-0 grid place-items-center text-center p-3">
+                <i class="ri-folder-3-line text-4xl sm:text-5xl mb-2"></i>
+                <div>
+                    <p class="text-sm sm:text-base font-bold">파일</p>
+                    <p class="text-[11px] text-slate-300/80">리소스 보관</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- 채팅 -->
+        <a href="#chat" class="cube group relative">
+            <span class="ring"></span>
+            <div class="absolute inset-0 grid place-items-center text-center p-3">
+                <i class="ri-message-3-line text-4xl sm:text-5xl mb-2"></i>
+                <div>
+                    <p class="text-sm sm:text-base font-bold">채팅</p>
+                    <p class="text-[11px] text-slate-300/80">실시간 협업</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- 달력 -->
+        <a href="#calendar" class="cube group relative">
+            <span class="ring"></span>
+            <div class="absolute inset-0 grid place-items-center text-center p-3">
+                <i class="ri-calendar-schedule-line text-4xl sm:text-5xl mb-2"></i>
+                <div>
+                    <p class="text-sm sm:text-base font-bold">달력</p>
+                    <p class="text-[11px] text-slate-300/80">일정 관리</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Quick info cards (like floating tiles) -->
+    <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="glass rounded-2xl p-4 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-ui-600 grid place-items-center"><i class="ri-time-line"></i></div>
+            <div>
+                <p class="text-sm font-semibold">최근 작업</p>
+                <p class="text-xs text-slate-300/80">5분 전 · “온보딩 다이어그램” 저장</p>
+            </div>
+        </div>
+        <div class="glass rounded-2xl p-4 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-candy-600 grid place-items-center"><i class="ri-heart-2-line"></i></div>
+            <div>
+                <p class="text-sm font-semibold">즐겨찾기</p>
+                <p class="text-xs text-slate-300/80">대시보드, 컴포넌트 키트</p>
+            </div>
+        </div>
+        <div class="glass rounded-2xl p-4 flex items-center gap-3 lg:col-span-1 sm:col-span-2">
+            <div class="h-10 w-10 rounded-xl bg-white/10 grid place-items-center"><i class="ri-shield-check-line"></i></div>
+            <div class="flex-1">
+                <p class="text-sm font-semibold">세션</p>
+                <p class="text-xs text-slate-300/80">안전한 연결 · 2단계 인증 사용</p>
+            </div>
+            <button class="text-xs px-3 py-1.5 rounded-xl border border-white/15 hover:bg-white/10">관리</button>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="mt-10 border-t border-white/10">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <div class="grid sm:grid-cols-3 gap-6 items-center">
+            <div class="text-sm text-slate-300/80">
+                <p>© <span id="y"></span> UX / UI Dashboard. All rights reserved.</p>
+            </div>
+            <nav class="flex justify-center gap-5 text-sm">
+                <a href="#" class="uline">가이드</a>
+                <a href="#" class="uline">개인정보처리방침</a>
+                <a href="#" class="uline">이용약관</a>
+            </nav>
+            <div class="flex sm:justify-end gap-3">
+                <a aria-label="twitter" href="#" class="h-9 w-9 rounded-xl grid place-items-center bg-white/5 border border-white/10 hover:bg-white/10"><i class="ri-twitter-x-line"></i></a>
+                <a aria-label="github" href="#" class="h-9 w-9 rounded-xl grid place-items-center bg-white/5 border border-white/10 hover:bg-white/10"><i class="ri-github-line"></i></a>
+                <a aria-label="dribbble" href="#" class="h-9 w-9 rounded-xl grid place-items-center bg-white/5 border border-white/10 hover:bg-white/10"><i class="ri-dribbble-line"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Interaction Scripts -->
+<script>
+    // 간단한 라이트/다크 토글 (배경만 반전 느낌)
+    const modeBtn = document.getElementById('modeBtn');
+    modeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('light');
+        if(document.body.classList.contains('light')){
+            document.body.style.background =
+                'linear-gradient(180deg, #f8fafc, #eef2ff 60%)';
+        } else {
+            document.body.style.background =
+                'radial-gradient(1200px 600px at 85% -10%, #ffd1e6 0%, rgba(255,210,230,0) 60%), radial-gradient(1000px 600px at -10% 0%, #c7d2ff 0%, rgba(199,210,255,0) 55%), linear-gradient(135deg, #0f172a 0%, #111827 100%)';
+        }
+    });
+
+    // 유저 메뉴 드롭다운
+    const userBtn = document.getElementById('userBtn');
+    const userMenu = document.getElementById('userMenu');
+    document.addEventListener('click', (e) => {
+        if (userBtn.contains(e.target)) {
+            userMenu.classList.toggle('hidden');
+        } else if (!userMenu.contains(e.target)) {
+            userMenu.classList.add('hidden');
+        }
+    });
+
+    // Footer year
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // 큐브 클릭 라우팅(데모): 실제 앱에선 라우터로 교체
+    const routes = {
+        '#write': () => alert('글쓰기로 이동합니다 ✍️'),
+        '#stats': () => alert('통계로 이동합니다 📊'),
+        '#diagram': () => alert('다이어그램으로 이동합니다 🌐'),
+        '#gallery': () => alert('갤러리로 이동합니다 🖼️'),
+        '#settings': () => alert('설정으로 이동합니다 ⚙️'),
+        '#users': () => alert('사용자 관리로 이동합니다 👥'),
+        '#alerts': () => alert('알림으로 이동합니다 🔔'),
+        '#files': () => alert('파일로 이동합니다 🗂️'),
+        '#chat': () => alert('채팅으로 이동합니다 💬'),
+        '#calendar': () => alert('달력으로 이동합니다 🗓️'),
+    };
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+            const href = a.getAttribute('href');
+            if (routes[href]) {
+                e.preventDefault();
+                routes[href]();
+            }
+        });
+    });
+</script>
+</body>
+</html>

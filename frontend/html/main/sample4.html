@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>UX/UI 대시보드 — 큐브 네비게이션</title>
+
+    <!-- Tailwind CDN (play CDN for quick prototype) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Font (한글용) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Boxicons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <style>
+        :root{
+            --accent-1: linear-gradient(135deg,#7c3aed 0%, #06b6d4 100%);
+            --accent-2: linear-gradient(135deg,#ef4444 0%, #f97316 100%);
+            --glass: rgba(255,255,255,0.06);
+        }
+        html,body{height:100%}
+        body{
+            font-family: "Noto Sans KR", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: linear-gradient(180deg, #0f172a 0%, #0b1220 55%, #071225 100%);
+            color: #e6edf3;
+        }
+
+        /* 큐브(정사각 버튼) - 3D 느낌 */
+        .cube {
+            width: 120px;
+            height: 120px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            backdrop-filter: blur(6px);
+            box-shadow: 0 12px 30px rgba(2,6,23,0.7), 0 4px 12px rgba(2,6,23,0.6);
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            transition: transform .28s cubic-bezier(.2,.9,.3,1), box-shadow .2s;
+            position:relative;
+            cursor:pointer;
+            overflow:visible;
+        }
+        .cube::after{
+            /* 아래 그림자(층) 느낌) */
+            content:'';
+            position:absolute;
+            left:10px;
+            right:10px;
+            bottom:-14px;
+            height:18px;
+            background: linear-gradient(180deg, rgba(2,6,23,0.55), rgba(2,6,23,0.25));
+            border-radius:8px;
+            filter: blur(8px);
+            transform: scaleX(0.98);
+            z-index:-1;
+            transition: all .28s;
+        }
+        .cube:hover{
+            transform: translateY(-10px) rotateX(6deg) scale(1.04);
+            box-shadow: 0 26px 50px rgba(2,6,23,0.8), 0 8px 18px rgba(2,6,23,0.7);
+        }
+        .cube:active{
+            transform: translateY(-4px) rotateX(4deg) scale(1.01);
+        }
+
+        /* 큐브 아이콘 스타일 */
+        .cube .icon-wrap{
+            width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+            font-size:26px;color:white;
+            box-shadow: 0 6px 18px rgba(2,6,23,0.4), inset 0 -6px 12px rgba(0,0,0,0.2);
+        }
+        /* 라벨 */
+        .cube .label{
+            font-size:13px;font-weight:700;color:#e6eefc;text-align:center;
+        }
+
+        /* 각 큐브의 컬러 바리에이션 */
+        .accent-blue .icon-wrap{ background: linear-gradient(180deg,#3b82f6,#6366f1) }
+        .accent-purple .icon-wrap{ background: linear-gradient(180deg,#7c3aed,#a78bfa) }
+        .accent-pink .icon-wrap{ background: linear-gradient(180deg,#f472b6,#fb7185) }
+        .accent-green .icon-wrap{ background: linear-gradient(180deg,#10b981,#34d399) }
+        .accent-orange .icon-wrap{ background: linear-gradient(180deg,#fb923c,#f97316) }
+
+        /* 반응형(작은 화면에서 큐브 크기 조정) */
+        @media (max-width:640px){
+            .cube{width:100px;height:100px;border-radius:12px}
+            .cube .icon-wrap{width:48px;height:48px;font-size:22px}
+            .cube .label{font-size:12px}
+        }
+
+        /* 모달 */
+        .modal-backdrop{
+            position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.6);
+            z-index:60;backdrop-filter: blur(4px);
+        }
+        .modal{
+            width:min(720px,92%);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            border-radius:12px;padding:20px;border:1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 18px 40px rgba(2,6,23,0.7);
+        }
+
+        /* 헤더/푸터 그림자 */
+        header, footer{
+            background: linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            backdrop-filter: blur(4px);
+        }
+
+        /* 유저 아바타 */
+        .avatar{
+            width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#06b6d4);
+            display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:white;
+            box-shadow: 0 6px 18px rgba(2,6,23,0.5);
+        }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- 헤더 -->
+<header class="px-4 py-4 md:py-6">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="rounded-lg px-3 py-2 bg-white/4 border border-white/6">
+                <span class="text-2xl font-extrabold" style="letter-spacing:1px">UX<span class="text-indigo-400">/</span>UI</span>
+            </div>
+            <div class="hidden md:block text-sm text-slate-300">User Experience Dashboard</div>
+        </div>
+
+        <!-- 로그인 상태 표시 (아바타 + 이름) -->
+        <div class="flex items-center gap-4">
+            <div class="text-sm text-slate-300 hidden sm:block">환영합니다, <span class="font-semibold text-white">김디자이너</span></div>
+            <div class="avatar" title="김디자이너">KD</div>
+        </div>
+    </div>
+</header>
+
+<!-- 메인 컨텐츠 -->
+<main class="flex-1 w-full">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- 상단 요약 카드 -->
+        <section class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 p-6 rounded-xl" style="background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.04);">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold">대시보드</h2>
+                        <p class="text-sm text-slate-300 mt-1">로그인된 상태로 접근한 개인화된 작업 공간입니다.</p>
+                    </div>
+                    <div class="text-sm text-slate-300">
+                        현재 상태: <span class="font-semibold text-white">온라인</span>
+                    </div>
+                </div>
+
+                <!-- 큐브 영역 설명 -->
+                <div class="mt-6 text-sm text-slate-300">
+                    큐브 버튼을 눌러 각 기능으로 진입하세요. (큐브는 정사각형이며 테두리가 있고, 아이콘과 라벨로 기능을 직관적으로 안내합니다.)
+                </div>
+            </div>
+
+            <div class="p-6 rounded-xl" style="background: linear-gradient(135deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00)); border:1px solid rgba(255,255,255,0.04);">
+                <h3 class="text-lg font-semibold">요약</h3>
+                <div class="mt-4 grid grid-cols-3 gap-3">
+                    <div class="text-center">
+                        <div class="text-sm text-slate-300">프로젝트</div>
+                        <div class="text-xl font-bold">12</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-slate-300">알림</div>
+                        <div class="text-xl font-bold">3</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-slate-300">메시지</div>
+                        <div class="text-xl font-bold">7</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 큐브 네비게이션 그리드 -->
+        <section>
+            <h3 class="text-lg font-semibold mb-4">기능 메뉴</h3>
+
+            <!-- responsive grid: mobile 3 columns, sm:4, md:6, lg:8 -->
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                <!-- 각각의 큐브 버튼: data-action 속성으로 동작 지정 -->
+                <div class="cube accent-blue" role="button" tabindex="0" data-action="write">
+                    <div class="icon-wrap"><i class='bx bx-pencil'></i></div>
+                    <div class="label">글쓰기</div>
+                </div>
+
+                <div class="cube accent-purple" role="button" tabindex="0" data-action="analytics">
+                    <div class="icon-wrap"><i class='bx bx-bar-chart-alt-2'></i></div>
+                    <div class="label">통계</div>
+                </div>
+
+                <div class="cube accent-pink" role="button" tabindex="0" data-action="profile">
+                    <div class="icon-wrap"><i class='bx bx-user-circle'></i></div>
+                    <div class="label">프로필</div>
+                </div>
+
+                <div class="cube accent-green" role="button" tabindex="0" data-action="messages">
+                    <div class="icon-wrap"><i class='bx bx-message-rounded-dots'></i></div>
+                    <div class="label">메시지</div>
+                </div>
+
+                <div class="cube accent-orange" role="button" tabindex="0" data-action="design">
+                    <div class="icon-wrap"><i class='bx bx-palette'></i></div>
+                    <div class="label">디자인</div>
+                </div>
+
+                <div class="cube accent-blue" role="button" tabindex="0" data-action="settings">
+                    <div class="icon-wrap"><i class='bx bx-cog'></i></div>
+                    <div class="label">설정</div>
+                </div>
+
+                <div class="cube accent-purple" role="button" tabindex="0" data-action="files">
+                    <div class="icon-wrap"><i class='bx bx-folder'></i></div>
+                    <div class="label">파일</div>
+                </div>
+
+                <div class="cube accent-pink" role="button" tabindex="0" data-action="help">
+                    <div class="icon-wrap"><i class='bx bx-help-circle'></i></div>
+                    <div class="label">도움말</div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- 푸터 -->
+<footer class="px-4 py-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+        <div class="text-sm text-slate-400">© 2025 UXUI Studio — 모든 권리 보유</div>
+        <div class="flex items-center gap-4 text-slate-400 text-sm">
+            <a href="#" class="hover:text-white">이용약관</a>
+            <a href="#" class="hover:text-white">개인정보처리방침</a>
+            <a href="#" class="hover:text-white">문의</a>
+        </div>
+    </div>
+</footer>
+
+<!-- 모달(동적 생성) -->
+<div id="modalRoot"></div>
+
+<script>
+    // 큐브 클릭 핸들러 — data-action 속성 기반
+    (function(){
+        const cubes = document.querySelectorAll('.cube');
+        const modalRoot = document.getElementById('modalRoot');
+
+        function openModal(title, contentHtml){
+            // 간단한 모달 생성
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop';
+            backdrop.innerHTML = `
+          <div class="modal">
+            <div class="flex items-start justify-between">
+              <div>
+                <h3 class="text-xl font-bold">${title}</h3>
+                <p class="text-sm text-slate-300 mt-1">해당 기능으로 이동합니다.</p>
+              </div>
+              <button class="close-btn text-slate-300 hover:text-white" aria-label="닫기">
+                <i class='bx bx-x text-2xl'></i>
+              </button>
+            </div>
+            <div class="mt-4 text-slate-300">${contentHtml}</div>
+            <div class="mt-6 flex justify-end gap-2">
+              <button class="px-4 py-2 rounded-md text-sm" id="cancelBtn">취소</button>
+              <button class="px-4 py-2 rounded-md bg-indigo-500 text-white" id="confirmBtn">이동</button>
+            </div>
+          </div>
+        `;
+            modalRoot.appendChild(backdrop);
+
+            // 닫기 핸들러
+            backdrop.querySelector('.close-btn').addEventListener('click', ()=> backdrop.remove());
+            backdrop.querySelector('#cancelBtn').addEventListener('click', ()=> backdrop.remove());
+            backdrop.querySelector('#confirmBtn').addEventListener('click', ()=> {
+                // 여기서 실제 네비게이션/기능 진입을 처리합니다.
+                // 현재는 시뮬레이션: alert -> 모달 닫기
+                alert(title + " 페이지로 이동합니다.");
+                backdrop.remove();
+            });
+
+            // 백드롭 클릭으로 닫기 가능
+            backdrop.addEventListener('click', (e)=>{
+                if(e.target === backdrop) backdrop.remove();
+            });
+        }
+
+        // 데이터-액션별 라벨/설명 매핑
+        const actions = {
+            write: {title:'글쓰기', desc:'새 글을 작성합니다. 템플릿 및 미리보기 포함.'},
+            analytics: {title:'통계', desc:'프로젝트와 사용자 통계 데이터를 확인합니다.'},
+            profile: {title:'프로필', desc:'프로필과 계정 정보를 관리합니다.'},
+            messages: {title:'메시지', desc:'유저 메시지 및 알림을 확인합니다.'},
+            design: {title:'디자인', desc:'디자인 에셋과 컴포넌트를 관리합니다.'},
+            settings: {title:'설정', desc:'앱 환경설정 및 사용자 설정.'},
+            files: {title:'파일', desc:'업로드된 파일과 문서를 관리합니다.'},
+            help: {title:'도움말', desc:'자주 묻는 질문과 가이드를 확인합니다.'}
+        };
+
+        cubes.forEach(c=>{
+            c.addEventListener('click', ()=>{
+                const action = c.dataset.action;
+                const meta = actions[action] || {title:'기능', desc:'기능 설명 없음'};
+                openModal(meta.title, `<p>${meta.desc}</p>`);
+            });
+
+            // 키보드 접근성: Enter 또는 Space
+            c.addEventListener('keydown', (e)=>{
+                if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); }
+            });
+        });
+
+        // (선택) 키보드 단축키: 숫자키 1~8로 빠르게 이동
+        window.addEventListener('keydown', (e)=>{
+            if(document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+            if(/^[1-8]$/.test(e.key)){
+                const idx = parseInt(e.key,10)-1;
+                if(cubes[idx]) cubes[idx].click();
+            }
+        });
+    })();
+</script>
+
+</body>
+</html>

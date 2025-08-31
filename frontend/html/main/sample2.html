@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>UX/UI Dashboard – Modern Cube UI</title>
+
+    <!-- Google Fonts: Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ["Noto Sans KR", "ui-sans-serif", "system-ui"] },
+                    colors: {
+                        brand: {
+                            50: "#f6edff",
+                            100: "#efe1ff",
+                            200: "#d9bbff",
+                            300: "#c08dff",
+                            400: "#a25bff",
+                            500: "#8b3dff",
+                            600: "#6f25e6",
+                            700: "#5a1bb8",
+                            800: "#481892",
+                            900: "#331164",
+                        }
+                    },
+                    boxShadow: {
+                        'cube': "0 10px 20px rgba(24, 3, 64, .18), inset 0 1px 0 rgba(255,255,255,.05)"
+                    },
+                    backdropBlur: { xs: '2px' }
+                }
+            },
+            darkMode: ['class', '[data-theme="dark"]'],
+        }
+    </script>
+
+    <!-- Remix Icon & Boxicons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-grad: radial-gradient(1200px 600px at 10% 0%, #5b5bd9 0%, transparent 50%),
+            radial-gradient(900px 500px at 90% 10%, #ff5ca8 0%, transparent 55%),
+            linear-gradient(135deg, #1a1b2e 0%, #1b1230 100%);
+        }
+        html,body { height: 100%; }
+        body { background: var(--bg-grad); }
+        /* Glass header/footer backdrop */
+        .glass {
+            background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,.15);
+        }
+        /* CUBE button (square, bordered, icon-centered) */
+        .cube {
+            aspect-ratio: 1 / 1;               /* 정사각형 유지 */
+            border: 1.5px solid rgba(255,255,255,.28); /* 보더 */
+            background:
+                    radial-gradient(120% 100% at 100% 0%, rgba(255,255,255,.18), rgba(255,255,255,.02) 60%),
+                    linear-gradient(145deg, rgba(163,108,255,.35), rgba(0,0,0,.12));
+            box-shadow: 0 12px 22px rgba(0, 0, 0, .22), inset 0 2px 0 rgba(255,255,255,.08);
+            transform-style: preserve-3d;
+            transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s, border-color .35s;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+        .cube::after { /* subtle 3D lip */
+            content: "";
+            position: absolute; inset: 0;
+            border-radius: inherit;
+            border: 6px solid rgba(255,255,255,.04);
+            pointer-events: none;
+        }
+        .cube:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 18px 30px rgba(0, 0, 0, .30), inset 0 2px 0 rgba(255,255,255,.1);
+            border-color: rgba(255,255,255,.45);
+        }
+        .cube:active { transform: translateY(-1px) scale(.995); }
+
+        /* dotted connectors (purely decorative on large screens) */
+        .connector {
+            display: none;
+        }
+        @media (min-width: 1024px) {
+            .connector {
+                display: block;
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background-image:
+                        radial-gradient(circle at 2px 2px, rgba(255,255,255,.35) 2px, transparent 2.5px);
+                background-size: 14px 14px;
+                mask-image: radial-gradient(60% 50% at 50% 50%, #000 60%, transparent 61%);
+                opacity: .35;
+            }
+        }
+
+        /* Ensure at least 3 columns even on tiny screens */
+        @media (max-width: 359px) {
+            /* tighten paddings and font sizes gracefully for ultra-narrow */
+            .cube h3 { font-size: .70rem; }
+        }
+    </style>
+</head>
+
+<body class="font-sans text-white/90 antialiased">
+<!-- HEADER -->
+<header class="glass sticky top-0 z-50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-brand-400 to-pink-500 grid place-items-center shadow-cube">
+                    <i class="ri-flashlight-line text-xl"></i>
+                </div>
+                <div class="leading-tight">
+                    <p class="font-bold tracking-wide">U-Tooki</p>
+                    <p class="text-xs text-white/60 -mt-0.5">UX / UI Dashboard</p>
+                </div>
+            </div>
+
+            <div class="hidden md:flex items-center gap-3">
+                <div class="relative">
+                    <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-white/50"></i>
+                    <input class="w-64 pl-9 pr-3 py-2 rounded-xl bg-white/5 border border-white/15 outline-none focus:ring-2 focus:ring-brand-400/60"
+                           placeholder="검색 (명령어: /help)" />
+                </div>
+                <button class="relative p-2 rounded-xl hover:bg-white/10 transition">
+                    <i class="ri-notification-3-line text-xl"></i>
+                    <span id="notif-dot" class="absolute right-1 top-1 h-2 w-2 rounded-full bg-pink-400"></span>
+                </button>
+                <div class="h-9 w-9 rounded-full overflow-hidden ring-2 ring-white/20">
+                    <img src="https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=200&auto=format&fit=crop" alt="사용자 아바타" class="h-full w-full object-cover" />
+                </div>
+                <div class="text-sm leading-4">
+                    <p class="font-semibold">홍길동</p>
+                    <p class="text-white/60">로그인됨</p>
+                </div>
+            </div>
+
+            <button id="menuBtn" class="md:hidden p-2 rounded-xl hover:bg-white/10">
+                <i class="ri-menu-3-line text-2xl"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- MOBILE drawer -->
+<nav id="mobileNav" class="md:hidden hidden glass mx-3 mt-2 rounded-2xl p-3">
+    <div class="flex items-center gap-3 mb-3">
+        <div class="h-10 w-10 rounded-full overflow-hidden ring-2 ring-white/20">
+            <img src="https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=200&auto=format&fit=crop" alt="사용자 아바타" class="h-full w-full object-cover" />
+        </div>
+        <div class="text-sm">
+            <p class="font-semibold">홍길동</p>
+            <p class="text-white/60">로그인됨</p>
+        </div>
+    </div>
+    <div class="grid grid-cols-3 gap-2">
+        <button class="px-3 py-2 rounded-xl bg-white/5 border border-white/15">알림</button>
+        <button class="px-3 py-2 rounded-xl bg-white/5 border border-white/15">설정</button>
+        <button class="px-3 py-2 rounded-xl bg-white/5 border border-white/15">로그아웃</button>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+        <div class="relative overflow-hidden rounded-3xl glass p-6 md:p-10">
+            <div class="absolute -top-12 -right-12 h-64 w-64 bg-pink-500/30 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-16 -left-16 h-64 w-64 bg-brand-500/30 rounded-full blur-3xl"></div>
+
+            <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6">
+                <div class="flex-1">
+                    <h1 class="text-3xl md:text-5xl font-black tracking-tight">
+                        UX / UI 큐브 대시보드
+                    </h1>
+                    <p class="mt-3 text-white/75 md:text-lg">
+                        로그인 사용자를 위한 핵심 기능을 <span class="font-semibold">큐브 카드</span>로 빠르게 액세스하세요.
+                        모바일·태블릿·PC 어디서나 최소 <b>3열</b> 그리드가 유지되며 자연스럽게 확장됩니다.
+                    </p>
+                    <div class="mt-5 flex items-center gap-3">
+                        <a href="#grid" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-2 font-semibold">
+                            시작하기 <i class="ri-arrow-right-up-line"></i>
+                        </a>
+                        <button id="themeToggle" class="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2">
+                            <i class="ri-moon-line"></i> 다크토글
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 grid grid-cols-3 gap-3 self-stretch">
+                    <!-- mini preview cubes -->
+                    <div class="cube rounded-2xl grid place-items-center">
+                        <i class="ri-bar-chart-2-line text-3xl"></i>
+                    </div>
+                    <div class="cube rounded-2xl grid place-items-center">
+                        <i class="ri-edit-2-line text-3xl"></i>
+                    </div>
+                    <div class="cube rounded-2xl grid place-items-center">
+                        <i class="ri-user-3-line text-3xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="connector"></div>
+</section>
+
+<!-- GRID (CUBES) -->
+<main id="grid" class="relative">
+    <div class="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 pb-16">
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-xl md:text-2xl font-bold">빠른 실행</h2>
+            <div class="hidden sm:flex items-center gap-2 text-xs text-white/70">
+                <i class='bx bx-info-circle text-base'></i> 큐브를 클릭하면 해당 기능으로 이동합니다.
+            </div>
+        </div>
+
+        <!-- 최소 3열 보장, 화면 커질수록 4/6열 -->
+        <div id="cubeGrid"
+             class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+            <!-- JS가 이 안을 채웁니다 -->
+        </div>
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="glass">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4 py-6">
+            <p class="text-white/70 text-sm">© <span id="year"></span> U-Tooki · 모든 권리 보유</p>
+            <nav class="flex items-center gap-4 text-sm">
+                <a href="#" class="hover:underline">개인정보처리방침</a>
+                <a href="#" class="hover:underline">이용약관</a>
+                <a href="#" class="hover:underline">고객센터</a>
+            </nav>
+        </div>
+    </div>
+</footer>
+
+<!-- TOAST -->
+<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-6 z-[60] hidden">
+    <div class="glass rounded-2xl px-4 py-2 shadow-cube flex items-center gap-2">
+        <i class="ri-check-line text-xl"></i>
+        <span class="text-sm">준비중인 기능입니다.</span>
+    </div>
+</div>
+
+<script>
+    // 기본 데이터: 아이콘(큰), 타이틀(아이콘 아래 레이블), 라우트
+    const features = [
+        { icon: "ri-edit-2-line",     label: "글쓰기",       route: "#compose",   hue: "from-pink-400 to-rose-500" },
+        { icon: "ri-bar-chart-2-line",label: "통계",         route: "#stats",     hue: "from-violet-400 to-fuchsia-500" },
+        { icon: "ri-chat-3-line",     label: "메시지",       route: "#messages",  hue: "from-sky-400 to-cyan-500" },
+        { icon: "ri-folder-2-line",   label: "파일",         route: "#files",     hue: "from-emerald-400 to-teal-500" },
+        { icon: "ri-user-3-line",     label: "프로필",       route: "#profile",   hue: "from-amber-400 to-orange-500" },
+        { icon: "ri-calendar-line",   label: "캘린더",       route: "#calendar",  hue: "from-indigo-400 to-blue-500" },
+        { icon: "ri-team-line",       label: "팀",           route: "#team",      hue: "from-lime-400 to-green-500" },
+        { icon: "ri-settings-3-line", label: "설정",         route: "#settings",  hue: "from-slate-300 to-slate-500" },
+        { icon: "ri-shopping-bag-3-line", label: "스토어",  route: "#store",     hue: "from-fuchsia-400 to-pink-500" },
+        { icon: "ri-lightbulb-flash-line", label: "아이디어",route: "#ideas",     hue: "from-yellow-300 to-amber-500" },
+        { icon: "ri-customer-service-2-line", label: "지원", route: "#support",   hue: "from-cyan-400 to-teal-500" },
+        { icon: "ri-shield-check-line", label: "보안",       route: "#security",  hue: "from-purple-400 to-violet-600" },
+    ];
+
+    // 유틸
+    const el = (sel, ctx=document) => ctx.querySelector(sel);
+    const showToast = (msg="준비중인 기능입니다.") => {
+        const t = el('#toast'); t.querySelector('span').textContent = msg;
+        t.classList.remove('hidden'); clearTimeout(showToast._id);
+        showToast._id = setTimeout(()=> t.classList.add('hidden'), 1600);
+    };
+
+    // Grid 렌더링: 큐브 카드 (정사각/보더/큰 아이콘/기능명)
+    function renderGrid() {
+        const grid = el('#cubeGrid');
+        grid.innerHTML = "";
+        features.forEach(f => {
+            const a = document.createElement('a');
+            a.href = f.route;
+            a.className =
+                `cube rounded-2xl relative group overflow-hidden focus:outline-none focus:ring-2 focus:ring-white/50`;
+            a.setAttribute('aria-label', f.label);
+
+            a.innerHTML = `
+          <div class="absolute inset-0 bg-gradient-to-br ${f.hue} opacity-30 group-hover:opacity-40 transition"></div>
+          <div class="relative h-full w-full flex flex-col items-center justify-center gap-2">
+            <i class="${f.icon} text-4xl md:text-5xl drop-shadow"></i>
+            <h3 class="text-[12px] sm:text-sm font-semibold tracking-tight">${f.label}</h3>
+          </div>
+          <div class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition">
+            <i class="ri-arrow-right-up-line"></i>
+          </div>
+        `;
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                // 라우트에 따라 실제 페이지로 이동하거나 데모 토스트
+                if (f.route.startsWith("#")) {
+                    showToast(`"${f.label}"(으)로 이동합니다`);
+                } else {
+                    location.href = f.route;
+                }
+            });
+
+            grid.appendChild(a);
+        });
+    }
+
+    // 헤더 인터랙션
+    el('#menuBtn').addEventListener('click', () => {
+        el('#mobileNav').classList.toggle('hidden');
+    });
+
+    // 테마 토글 (데모)
+    el('#themeToggle').addEventListener('click', () => {
+        const root = document.documentElement;
+        const cur = root.getAttribute('data-theme');
+        if (cur === 'dark') {
+            root.removeAttribute('data-theme');
+            document.body.style.background = "var(--bg-grad)";
+        } else {
+            root.setAttribute('data-theme','dark');
+            document.body.style.background =
+                "linear-gradient(160deg,#0b0b13 0%,#0e0f1c 100%)";
+        }
+    });
+
+    // 초기화
+    renderGrid();
+    el('#year').textContent = new Date().getFullYear();
+
+    // 접근성: 키보드 포커스 이동 시 헤더 그림자 강화
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        header.classList.toggle('shadow-lg', window.scrollY > 6);
+    });
+
+    // 알림 점 애니메이션
+    setInterval(() => {
+        const n = el('#notif-dot');
+        n.style.opacity = n.style.opacity === '0' ? '1' : '0';
+    }, 900);
+</script>
+</body>
+</html>

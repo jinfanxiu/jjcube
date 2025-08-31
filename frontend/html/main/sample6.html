@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CubeDash – Modern Cube UI</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Noto Sans KR"', 'ui-sans-serif', 'system-ui'] },
+                    colors: {
+                        brand: { 500: '#5b6cff', 600: '#3f4df2' },
+                        hot: { 500: '#ff4d6d' },
+                    }
+                }
+            },
+            darkMode: 'class'
+        }
+    </script>
+
+    <style>
+        /* 배경 */
+        .app-bg {
+            background:
+                    radial-gradient(1200px 600px at 10% -10%, rgba(255, 77, 109, .18), transparent 60%),
+                    radial-gradient(1000px 500px at 120% 20%, rgba(91, 108, 255, .22), transparent 55%),
+                    linear-gradient(135deg, #f8fafc 0%, #fff 100%);
+        }
+        .dark .app-bg {
+            background:
+                    radial-gradient(1200px 600px at 10% -10%, rgba(255, 77, 109, .18), transparent 60%),
+                    radial-gradient(1000px 500px at 120% 20%, rgba(91, 108, 255, .22), transparent 55%),
+                    linear-gradient(135deg, #0b1220 0%, #0f172a 100%);
+        }
+
+        /* ===== Cube 버튼 스타일 ===== */
+        .cube {
+            position: relative;
+            min-width: 160px;
+            min-height: 160px;
+            border-radius: 14px;
+            transition: transform .22s cubic-bezier(.2,.9,.2,1), box-shadow .22s;
+            cursor: pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-direction:column;
+            text-align:center;
+            border:1px solid rgba(0,0,0,0.08);
+            overflow: visible;
+            background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.3));
+        }
+        .dark .cube{
+            border:1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+        }
+        .cube:hover{
+            transform: translateY(-10px) rotateX(6deg);
+            box-shadow: 0 22px 40px rgba(2,6,23,0.25);
+        }
+        .cube .icon-wrap{
+            width:72px;height:72px;border-radius:12px;
+            display:flex;align-items:center;justify-content:center;
+            font-size:32px;
+            background: linear-gradient(135deg,#7c3aed,#ec4899);
+            color:#fff;
+        }
+        .cube .label{ margin-top:12px; font-weight:700; font-size:14px; }
+        .cube .subtitle{ margin-top:4px; font-size:12px; opacity:.75; font-weight:500; }
+
+        .grid-cubes{
+            display:grid;
+            gap:20px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-800 dark:text-slate-100 app-bg min-h-screen flex flex-col">
+
+<header class="sticky top-0 z-40 backdrop-blur bg-white/60 dark:bg-slate-900/50 border-b border-slate-200/60 dark:border-slate-800">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
+        <div class="flex items-center gap-3">
+      <span class="inline-flex h-9 w-9 items-center justify-center">
+        <svg width="36" height="36" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 4L60 18V46L32 60L4 46V18L32 4Z" fill="#5b6cff"/>
+          <path d="M32 4L60 18L32 32L4 18L32 4Z" fill="#8796ff"/>
+          <path d="M32 32L60 18V46L32 60V32Z" fill="#3f4df2"/>
+        </svg>
+      </span>
+            <div>
+                <p class="font-black text-lg tracking-tight">CubeDash</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 -mt-0.5">Modern Experience</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="text-right">
+                <p class="text-sm font-semibold leading-4">홍길동</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Product Designer</p>
+            </div>
+            <button class="h-10 w-10 rounded-full overflow-hidden ring-2 ring-white dark:ring-slate-900">
+                <img alt="avatar" src="https://api.dicebear.com/9.x/avataaars/svg?seed=uiux" class="h-full w-full object-cover" />
+            </button>
+            <button id="themeToggle" class="hidden sm:inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2">
+                <i class="bx bx-moon"></i><span class="text-sm">다크</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
+    <h2 class="text-xl sm:text-2xl font-extrabold mb-6">빠른 기능</h2>
+    <div class="grid-cubes">
+        <button class="cube">
+            <div class="icon-wrap" style="background:linear-gradient(135deg,#ffd6e0,#ff7ab6);color:#0b1221;">
+                <i class='bx bx-pencil'></i>
+            </div>
+            <div class="label">글쓰기</div>
+            <div class="subtitle">새 문서 작성</div>
+        </button>
+        <button class="cube">
+            <div class="icon-wrap" style="background:linear-gradient(135deg,#7c3aed,#ec4899);">
+                <i class='bx bx-line-chart'></i>
+            </div>
+            <div class="label">통계</div>
+            <div class="subtitle">대시보드 보기</div>
+        </button>
+        <button class="cube">
+            <div class="icon-wrap" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);">
+                <i class='bx bx-message-square-detail'></i>
+            </div>
+            <div class="label">메시지</div>
+            <div class="subtitle">팀 커뮤니케이션</div>
+        </button>
+        <button class="cube">
+            <div class="icon-wrap" style="background:linear-gradient(135deg,#34d399,#10b981);">
+                <i class='bx bx-user'></i>
+            </div>
+            <div class="label">사용자</div>
+            <div class="subtitle">멤버 관리</div>
+        </button>
+        <button class="cube">
+            <div class="icon-wrap" style="background:linear-gradient(135deg,#f97316,#ef4444);">
+                <i class='bx bx-folder'></i>
+            </div>
+            <div class="label">파일</div>
+            <div class="subtitle">프로젝트 자산</div>
+        </button>
+        <button class="cube">
+            <div class="icon-wrap" style="background:linear-gradient(135deg,#60a5fa,#818cf8);">
+                <i class='bx bx-cog'></i>
+            </div>
+            <div class="label">설정</div>
+            <div class="subtitle">환경 설정</div>
+        </button>
+    </div>
+</main>
+
+<footer class="border-t border-slate-200/70 dark:border-slate-800 mt-auto">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+        © 2025 CubeDash. All rights reserved.
+    </div>
+</footer>
+
+<script>
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    (function initTheme(){
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if(saved === 'dark' || (!saved && prefersDark)) root.classList.add('dark');
+    })();
+    themeToggle?.addEventListener('click', () => {
+        root.classList.toggle('dark');
+        localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
+    });
+</script>
+</body>
+</html>

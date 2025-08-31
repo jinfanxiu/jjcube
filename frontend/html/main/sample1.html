@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UX/UI Dashboard – Modern Cube UI</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind config: Korean font, custom colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'ui-sans-serif', 'system-ui', 'Apple SD Gothic Neo', 'Apple Color Emoji'],
+                    },
+                    colors: {
+                        brand: {
+                            50:  '#f5f7ff',
+                            100: '#ebefff',
+                            200: '#d7ddff',
+                            300: '#b4c0ff',
+                            400: '#8796ff',
+                            500: '#5b6cff',
+                            600: '#3f4df2',
+                            700: '#303ad1',
+                            800: '#2a31a7',
+                            900: '#232a85'
+                        },
+                        hot:  { 500:'#ff4d6d' },
+                    },
+                    boxShadow: {
+                        soft: '0 10px 30px rgba(0,0,0,.08)',
+                        glow: '0 10px 40px rgba(91,108,255,.35)',
+                    },
+                }
+            },
+            darkMode: 'class'
+        }
+    </script>
+
+    <style>
+        /* Glassy gradient background that nods to the reference image */
+        .app-bg {
+            background:
+                    radial-gradient(1200px 600px at 10% -10%, rgba(255, 77, 109, .18), transparent 60%),
+                    radial-gradient(1000px 500px at 120% 20%, rgba(91, 108, 255, .22), transparent 55%),
+                    linear-gradient(135deg, #f8fafc 0%, #fff 100%);
+        }
+        .dark .app-bg {
+            background:
+                    radial-gradient(1200px 600px at 10% -10%, rgba(255, 77, 109, .18), transparent 60%),
+                    radial-gradient(1000px 500px at 120% 20%, rgba(91, 108, 255, .22), transparent 55%),
+                    linear-gradient(135deg, #0b1220 0%, #0f172a 100%);
+        }
+
+        /* Cube button – square, border, elevated layers */
+        .cube {
+            position: relative;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+        .cube::after { /* subtle “shadow layer” to hint at a stack/cube */
+            content:'';
+            position:absolute; inset: 6px;
+            border-radius: 1.1rem;
+            transform: translateZ(-8px);
+            box-shadow: 0 14px 26px rgba(0,0,0,.08);
+            opacity:.0;
+            transition: opacity .18s ease;
+        }
+        .cube:hover {
+            transform: translateY(-6px) rotateX(1deg);
+            box-shadow: 0 16px 40px rgba(91,108,255,.25);
+            border-color: rgba(91,108,255,.55);
+        }
+        .cube:hover::after { opacity: 1; }
+
+        /* Utility: line clamp without plugin */
+        .line-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body class="font-sans text-slate-800 dark:text-slate-100 app-bg min-h-screen">
+<header class="sticky top-0 z-40 backdrop-blur bg-white/60 dark:bg-slate-900/50 border-b border-slate-200/60 dark:border-slate-800">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+            <div class="flex items-center gap-3">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-hot-500 text-white shadow-glow">
+            <i class="ri-shape-2-line text-xl"></i>
+          </span>
+                <div class="leading-tight">
+                    <p class="font-black text-lg tracking-tight">UX/UI</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 -mt-0.5">Modern Experience</p>
+                </div>
+            </div>
+
+            <div class="hidden md:flex flex-1 max-w-lg mx-6">
+                <label class="relative w-full">
+                    <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="search" placeholder="검색 ( / )" class="w-full rounded-xl pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-4 focus:ring-brand-500/20 focus:border-brand-500" />
+                </label>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="themeToggle" class="hidden sm:inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <i class="ri-moon-clear-line text-base"></i><span class="text-sm">다크</span>
+                </button>
+                <button class="relative p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <i class="ri-notification-3-line text-xl"></i>
+                    <span class="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-hot-500 ring-2 ring-white dark:ring-slate-900"></span>
+                </button>
+
+                <div class="ml-1 flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-sm font-semibold leading-4">홍길동</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Product Designer</p>
+                    </div>
+                    <button class="h-10 w-10 rounded-full overflow-hidden ring-2 ring-white dark:ring-slate-900 shadow-soft">
+                        <img alt="avatar" src="https://api.dicebear.com/9.x/avataaars/svg?seed=uiux" class="h-full w-full object-cover" />
+                    </button>
+                </div>
+                <button id="menuBtn" class="md:hidden p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800">
+                    <i class="ri-menu-3-line text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobileNav" class="hidden md:hidden pb-4">
+            <div class="grid gap-3">
+                <label class="relative">
+                    <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="search" placeholder="검색" class="w-full rounded-xl pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700" />
+                </label>
+                <nav class="grid grid-cols-3 gap-2 text-sm">
+                    <a class="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-center hover:bg-slate-50 dark:hover:bg-slate-800">대시보드</a>
+                    <a class="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-center hover:bg-slate-50 dark:hover:bg-slate-800">프로젝트</a>
+                    <a class="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-center hover:bg-slate-50 dark:hover:bg-slate-800">설정</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+    <div class="grid lg:grid-cols-3 gap-6 items-stretch">
+        <div class="lg:col-span-2 rounded-2xl p-6 sm:p-8 bg-white/70 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 shadow-soft">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div>
+                    <p class="text-sm uppercase tracking-widest text-brand-700 dark:text-brand-300 font-bold mb-2">Welcome back</p>
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight">
+                        오늘도 멋진 경험을 만들어봐요 ✨
+                    </h1>
+                    <p class="mt-2 text-slate-600 dark:text-slate-300">로그인 상태입니다. 아래 큐브 버튼으로 빠르게 기능에 접근하세요.</p>
+                    <div class="mt-5 flex flex-wrap gap-3">
+                        <a class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 text-white px-4 py-2.5 shadow-glow hover:translate-y-[-1px] transition">
+                            <i class="ri-rocket-2-line"></i>빠른 시작
+                        </a>
+                        <a class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800">
+                            <i class="ri-book-open-line"></i>가이드
+                        </a>
+                    </div>
+                </div>
+                <div class="relative w-full md:w-64 lg:w-80">
+                    <div class="absolute -top-6 -right-2 rotate-6">
+                        <div class="rounded-2xl bg-gradient-to-br from-hot-500 to-brand-500 text-white px-4 py-3 shadow-glow">
+                            <i class="ri-bar-chart-2-line"></i> 성장률 +17.5%
+                        </div>
+                    </div>
+                    <div class="rounded-3xl h-48 bg-gradient-to-br from-brand-500/90 to-hot-500/90 shadow-glow"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-4">
+            <div class="rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 p-5 shadow-soft">
+                <div class="flex items-center gap-3">
+                    <i class="ri-timer-flash-line text-2xl"></i>
+                    <div>
+                        <p class="text-xs text-slate-500">오늘 작업</p>
+                        <p class="text-lg font-bold">12 개</p>
+                    </div>
+                </div>
+            </div>
+            <div class="rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 p-5 shadow-soft">
+                <div class="flex items-center gap-3">
+                    <i class="ri-team-line text-2xl"></i>
+                    <div>
+                        <p class="text-xs text-slate-500">협업 멤버</p>
+                        <p class="text-lg font-bold">8 명</p>
+                    </div>
+                </div>
+            </div>
+            <div class="rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 p-5 shadow-soft">
+                <div class="flex items-center gap-3">
+                    <i class="ri-calendar-check-line text-2xl"></i>
+                    <div>
+                        <p class="text-xs text-slate-500">마감 일정</p>
+                        <p class="text-lg font-bold">3 건</p>
+                    </div>
+                </div>
+            </div>
+            <div class="rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800 p-5 shadow-soft">
+                <div class="flex items-center gap-3">
+                    <i class="ri-heart-2-line text-2xl"></i>
+                    <div>
+                        <p class="text-xs text-slate-500">피드백</p>
+                        <p class="text-lg font-bold">24 개</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
+    <div class="mb-4 sm:mb-6 flex items-center justify-between">
+        <h2 class="text-xl sm:text-2xl font-extrabold">빠른 기능</h2>
+        <div class="text-sm text-slate-500 dark:text-slate-400">휴대폰 · 태블릿 · PC 반응형</div>
+    </div>
+
+    <div class="grid grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 sm:gap-5">
+        <a href="#compose" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-pencil-line text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">글쓰기</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">새 문서 작성</p>
+        </a>
+
+        <a href="#stats" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-bar-chart-2-line text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">통계</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">지표 및 대시보드</p>
+        </a>
+
+        <a href="#diagram" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-node-tree text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">다이어그램</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">흐름도 · IA</p>
+        </a>
+
+        <a href="#users" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-user-voice-line text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">사용자</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">리서치 & 페르소나</p>
+        </a>
+
+        <a href="#files" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-folders-line text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">파일</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">프로젝트 자산</p>
+        </a>
+
+        <a href="#settings" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-settings-3-line text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">설정</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">환경 & 권한</p>
+        </a>
+
+        <a href="#alerts" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-notification-badge-line text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">알림</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">읽지 않은 항목</p>
+        </a>
+
+        <a href="#messages" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-message-3-line text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">메시지</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">팀 커뮤니케이션</p>
+        </a>
+
+        <a href="#favorites" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-star-smile-line text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">즐겨찾기</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">빠른 접근</p>
+        </a>
+
+        <a href="#support" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-customer-service-2-line text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">고객지원</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">도움말 & 문의</p>
+        </a>
+
+        <a href="#store" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-apps-2-line text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">스토어</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">플러그인</p>
+        </a>
+
+        <a href="#board" class="cube aspect-square rounded-2xl border bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-700 p-4 sm:p-5 flex flex-col items-center justify-center gap-2 text-center">
+            <i class="ri-layout-grid-line text-3xl sm:text-4xl"></i>
+            <span class="font-semibold text-sm sm:text-base">작업보드</span>
+            <p class="hidden sm:block text-xs text-slate-500 dark:text-slate-400 line-1">칸반 & 일정</p>
+        </a>
+    </div>
+</main>
+
+<footer class="border-t border-slate-200/70 dark:border-slate-800">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p class="text-sm text-slate-500 dark:text-slate-400">© 2025 UX/UI Studio. All rights reserved.</p>
+            <nav class="flex gap-4 text-sm">
+                <a class="hover:text-brand-600" href="#privacy">개인정보처리방침</a>
+                <a class="hover:text-brand-600" href="#terms">이용약관</a>
+                <a class="hover:text-brand-600" href="#contact">문의</a>
+            </nav>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Dark mode toggle with localStorage
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileNav = document.getElementById('mobileNav');
+
+    // Initialize theme
+    (function initTheme(){
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if(saved === 'dark' || (!saved && prefersDark)) root.classList.add('dark');
+    })();
+
+    if(themeToggle){
+        themeToggle.addEventListener('click', () => {
+            root.classList.toggle('dark');
+            localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
+        });
+    }
+
+    if(menuBtn){
+        menuBtn.addEventListener('click', () => mobileNav.classList.toggle('hidden'));
+    }
+
+    // Keyboard shortcuts: "/" focuses search, "g then ..." quick nav
+    const headerSearch = document.querySelector('input[type="search"]');
+    window.addEventListener('keydown', (e) => {
+        // focus search with "/"
+        if(e.key === '/' && headerSearch){
+            e.preventDefault();
+            headerSearch.focus();
+        }
+    });
+
+    // Demo navigation: intercept cube clicks and show gentle feedback
+    document.querySelectorAll('.cube').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            const label = el.querySelector('span')?.innerText || '기능';
+            el.classList.add('ring', 'ring-brand-500/40', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-slate-900');
+            setTimeout(() => {
+                alert(`"${label}" 기능으로 이동합니다 (데모)`);
+                el.classList.remove('ring', 'ring-brand-500/40', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-slate-900');
+            }, 200);
+        }, {passive:true});
+    });
+</script>
+</body>
+</html>

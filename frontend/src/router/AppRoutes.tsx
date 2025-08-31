@@ -4,6 +4,7 @@ import ToolboxPage from '../pages/toolbox/ToolboxPage';
 import LoginPage from '../pages/auth/LoginPage';
 import PendingApprovalPage from '../pages/auth/PendingApprovalPage';
 import AdminPage from '../pages/admin/AdminPage';
+import ImagePuffingPage from '../pages/toolbox/ImagePuffingPage';
 import { useAuth } from '../context/AuthProvider';
 
 const AppRoutes = () => {
@@ -28,6 +29,7 @@ const AppRoutes = () => {
                 <>
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/toolbox" element={<ToolboxPage />} />
+                    <Route path="/toolbox/image-editor" element={<ImagePuffingPage />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                 </>
             );
@@ -38,6 +40,7 @@ const AppRoutes = () => {
                 return (
                     <>
                         <Route path="/toolbox" element={<ToolboxPage />} />
+                        <Route path="/toolbox/image-editor" element={<ImagePuffingPage />} />
                         <Route path="*" element={<Navigate to="/toolbox" replace />} />
                     </>
                 );
