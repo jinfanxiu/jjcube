@@ -11,9 +11,9 @@ type CubeButtonProps = {
 };
 
 const CubeButton: FC<CubeButtonProps> = ({ icon, label, subtitle, colorKey, path }) => {
-    // h-36 대신 aspect-square를 사용하여 너비에 맞춰 높이를 조정하고, min-h-36을 추가하여 최소 높이를 보장
+    // PC 화면에서 버튼의 최대 너비를 제한하는 클래스 추가
     const base =
-        'relative group block overflow-hidden rounded-2xl w-full aspect-square min-h-[9rem] shadow-lg hover:shadow-xl transition-transform hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70';
+        'relative group block overflow-hidden rounded-2xl w-full aspect-square min-h-[9rem] max-w-[12rem] md:max-w-[14rem] lg:max-w-[16rem] mx-auto shadow-lg hover:shadow-xl transition-transform hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70';
 
     const colorMap: Record<string, string> = {
         sky: 'bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500',
