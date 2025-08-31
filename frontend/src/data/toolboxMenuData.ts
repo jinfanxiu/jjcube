@@ -9,12 +9,12 @@ type CubeButtonType = {
 // 툴박스 메뉴 데이터
 export const toolboxMenuData: readonly CubeButtonType[] = [
     {
-        icon: 'bx-image-alt',
-        label: '이미지 편집',
-        subtitle: '이미지 용량을 최적화합니다',
-        colorKey: 'teal',
-        path: '/toolbox/image-editor'
-    }
+        icon: 'bx-bot',
+        label: '미러 이미지 생성',
+        subtitle: '1장의 사진을 여러각도 이미지로',
+        colorKey: 'emerald',
+        path: '/toolbox/mirror-image'
+    },
     // {
     //     icon: 'bx-calendar-event',
     //     label: '예약 관리',

@@ -26,56 +26,58 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // 1. Session and User state management
     useEffect(() => {
-        // Get the initial session right away
+        const fetchUserAndProfile = async (session: Session | null) => {
+            if (session?.user) {
+                setUser(session.user);
+                setSession(session);
+
+                try {
+                    const { data: profileData, error } = await supabase
+                        .from('profiles')
+                        .select('role, is_approved, nickname, email')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (error && error.code !== 'PGRST116') {
+                        throw error;
+                    }
+
+                    setProfile(profileData);
+                } catch (error) {
+                    console.error("Error fetching profile:", (error as Error).message);
+                    setProfile(null);
+                }
+            } else {
+                setUser(null);
+                setSession(null);
+                setProfile(null);
+            }
+            // Only set loading to false after all user and profile data has been processed
+            setLoading(false);
+        };
+
+        // Get initial session and profile data
         supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            // We set loading to false here initially, but the profile loading might take longer
+            fetchUserAndProfile(session);
         });
 
-        // Listen for future changes
+        // Listen for auth state changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             (_event, session) => {
-                setSession(session);
-                setUser(session?.user ?? null);
+                // To prevent unnecessary re-renders on tab focus,
+                // only update if the user ID has actually changed.
+                if (session?.user?.id !== user?.id) {
+                    setLoading(true);
+                    fetchUserAndProfile(session);
+                }
             }
         );
 
         return () => {
             subscription.unsubscribe();
         };
-    }, []);
-
-    // 2. Profile state management, dependent on the user
-    useEffect(() => {
-        // If there's no user, there's no profile to fetch.
-        if (!user) {
-            setProfile(null);
-            setLoading(false); // No user, so we are done loading.
-            return;
-        }
-
-        // User exists, so start loading the profile.
-        setLoading(true);
-        supabase
-            .from('profiles')
-            .select('role, is_approved, nickname, email')
-            .eq('id', user.id)
-            .single()
-            .then(({ data, error }) => {
-                if (error && error.code !== 'PGRST116') {
-                    console.error("Error fetching profile:", error.message);
-                    setProfile(null);
-                } else {
-                    setProfile(data);
-                }
-                // Whether profile was found or not, we are done loading.
-                setLoading(false);
-            });
-
-    }, [user]); // This effect runs whenever the user object changes.
+    }, [user?.id]); // Depend only on user.id to stabilize the effect
 
     const logout = async () => {
         await supabase.auth.signOut();
@@ -89,6 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
     };
 
+    // Render children only when loading is finished to prevent rendering with incomplete auth data.
     return (
         <AuthContext.Provider value={value}>
             {children}
