@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ChangeEvent } from 'react';
 import { supabase } from '../../supabaseClient';
 
@@ -17,6 +17,33 @@ const MirrorImagePage = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [variationLevel, setVariationLevel] = useState<number>(1);
+    const [imageCredits, setImageCredits] = useState<number | null>(null);
+
+    useEffect(() => {
+        const fetchUserCredits = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile, error } = await supabase
+                        .from('profiles')
+                        .select('image_credits')
+                        .eq('id', user.id)
+                        .single();
+
+                    if (error) throw error;
+
+                    if (profile) {
+                        setImageCredits(profile.image_credits);
+                    }
+                }
+            } catch (error) {
+                console.error("크레딧 정보를 가져오는 데 실패했습니다:", error);
+            }
+        };
+
+        fetchUserCredits();
+    }, []);
+
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (originalImageSrc) {
@@ -55,7 +82,9 @@ const MirrorImagePage = () => {
             });
 
             if (error) {
-                throw new Error(error.message);
+                // 이 error는 non-2xx 상태 코드로 인한 것이므로 catch 블록에서 처리됩니다.
+                // 여기서는 네트워크 문제 등 다른 종류의 에러를 대비해 throw 합니다.
+                throw error;
             }
 
             if (data.error) {
@@ -64,11 +93,29 @@ const MirrorImagePage = () => {
 
             const newImageSrc = `data:${data.mimeType};base64,${data.imageBase64}`;
             setGeneratedImageSrc(newImageSrc);
+            setImageCredits(data.remainingCredits);
 
-        } catch (e) {
-            const err = e as Error;
-            console.error(err);
-            setError(`이미지 생성 실패: ${err.message}`);
+        } catch (e: any) {
+            console.error("이미지 생성 중 오류 발생:", e);
+
+            // Supabase 함수가 non-2xx 응답을 보낼 때 발생하는 오류를 처리합니다.
+            // e.context.json()을 통해 백엔드가 보낸 실제 JSON 오류 메시지를 얻을 수 있습니다.
+            if (e.context && typeof e.context.json === 'function') {
+                try {
+                    const errorJson = await e.context.json();
+                    if (errorJson.error) {
+                        setError(errorJson.error);
+                    } else {
+                        setError("알 수 없는 오류가 발생했습니다.");
+                    }
+                } catch (jsonError) {
+                    // JSON 파싱에 실패한 경우, 원래의 기본 오류 메시지를 표시합니다.
+                    setError(e.message || "이미지 처리 중 오류가 발생했습니다.");
+                }
+            } else {
+                // 그 외 다른 종류의 오류일 경우
+                setError(e.message || "알 수 없는 오류가 발생했습니다.");
+            }
         } finally {
             setIsProcessing(false);
         }
@@ -94,6 +141,16 @@ const MirrorImagePage = () => {
                     1장의 사진으로 <strong className="text-blue-700">여러 각도에서 찍은 사진을 생성</strong>합니다. 또한 <strong className="text-blue-700">같은 느낌 다른 사진</strong>을 생성합니다.
                 </p>
             </header>
+
+            <div className="text-center mb-8">
+                <div className="inline-flex items-center text-lg font-semibold bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-2 px-5 rounded-full shadow-md border border-gray-200 dark:border-gray-600">
+                    <span role="img" aria-label="ticket" className="mr-2 text-xl">🎟️</span>
+                    <span>오늘 남은 크레딧:</span>
+                    <span className="ml-2 font-bold text-2xl text-emerald-500 dark:text-emerald-400 w-10 text-left">
+                         {imageCredits !== null ? imageCredits : '...'}
+                     </span>
+                </div>
+            </div>
 
             <div className="space-y-8">
                 <div className="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 border border-gray-200 dark:border-gray-700">
@@ -157,12 +214,10 @@ const MirrorImagePage = () => {
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* 원본 이미지 */}
                     <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                         <h3 className="text-lg font-semibold text-center mb-4 text-gray-800 dark:text-white">원본 이미지</h3>
                         {originalImageSrc ? <img src={originalImageSrc} alt="Original" className="w-full rounded-lg shadow-md" /> : <div className="h-64 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg"><p className="text-gray-500">이미지를 업로드하세요</p></div>}
                     </div>
-                    {/* 생성된 이미지 */}
                     <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                         <h3 className="text-lg font-semibold text-center mb-4 text-gray-800 dark:text-white">생성된 이미지</h3>
                         {isProcessing ? (<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div></div>) : generatedImageSrc ? (

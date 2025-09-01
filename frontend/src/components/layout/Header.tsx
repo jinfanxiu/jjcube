@@ -45,7 +45,7 @@ const Header = () => {
                             </span>
                             <div>
                                 <p className="font-black text-lg tracking-tight">제이제이큐브</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 -mt-0.5">제이제이 뷰티 아카데미</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 -mt-0.5">제이제이 뷰티 아카데미 마케팅</p>
                             </div>
                         </Link>
                         <div className="hidden lg:flex lg:gap-x-8">
