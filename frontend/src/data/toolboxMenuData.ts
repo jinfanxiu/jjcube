@@ -15,6 +15,13 @@ export const toolboxMenuData: readonly CubeButtonType[] = [
         colorKey: 'emerald',
         path: '/toolbox/mirror-image'
     },
+    {
+        icon: 'bxs-conversation',
+        label: '게시글 & 댓글 생성기',
+        subtitle: 'AI로 진짜같은 게시글을 생성',
+        colorKey: 'violet',
+        path: '/toolbox/chatter-post-generator'
+    },
     // {
     //     icon: 'bx-calendar-event',
     //     label: '예약 관리',
