@@ -13,7 +13,7 @@ const AppRoutes = () => {
     const { session, profile, loading } = useAuth();
 
     if (loading) {
-        return <div className="flex-grow flex items-center justify-center">Loading Application...</div>;
+        return <div className="flex-grow flex">Loading...</div>;
     }
 
     const renderRoutes = () => {
