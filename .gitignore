@@ -281,3 +281,5 @@ node_modules
 
 # IDE
 .idea
+
+/data
