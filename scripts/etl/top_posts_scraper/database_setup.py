@@ -7,14 +7,25 @@ DB_URL = 'postgresql://postgres.ejksqilplxozpibhncud:Nvq3osw54nICb6dF@aws-1-ap-n
 
 db = connect(DB_URL)
 
-class Article(Model):
-    # Supabase 'articles' 테이블 스키마에 맞춘 모델 정의
-    # id, created_at은 자동 생성되므로 여기서는 정의하지 않습니다.
+class BaseModel(Model):
+    class Meta:
+        database = db
+
+
+class Article(BaseModel):
     url = CharField(unique=True, max_length=512)
     title = TextField()
     content = TextField()
     comments = TextField()
 
     class Meta:
-        database = db
-        table_name = 'articles' # Supabase에 생성한 테이블 이름과 일치시킵니다.
+        table_name = 'articles'
+
+class CertificateReview(BaseModel):
+    url = CharField(unique=True, max_length=512)
+    title = TextField()
+    content = TextField()
+    comments = TextField()
+
+    class Meta:
+        table_name = 'certificate_reviews'

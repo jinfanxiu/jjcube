@@ -22,6 +22,13 @@ export const toolboxMenuData: readonly CubeButtonType[] = [
         colorKey: 'violet',
         path: '/toolbox/chatter-post-generator'
     },
+    {
+        icon: 'bxs-badge-check',
+        label: '자격증 후기 & 댓글 생성기',
+        subtitle: 'AI로 합격 후기 게시글을 생성',
+        colorKey: 'sky',
+        path: '/toolbox/certificate-review-generator'
+    },
     // {
     //     icon: 'bx-calendar-event',
     //     label: '예약 관리',
