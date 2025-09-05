@@ -1,9 +1,16 @@
-import { beautyPrompt } from './beauty.ts';
-import { certificateReviewPrompt } from './certificateReview.ts';
-import { beautyPromoPostPrompt } from './beautyPromoPost.ts';
+import { beautyPromptConfig } from './beauty.ts';
+import { certificateReviewPromptConfig } from './certificateReview.ts';
+import { beautyPromoPostPromptConfig } from './beautyPromoPost.ts';
 
-export const prompts: { [key: string]: { system: string; model?: string } } = {
-    beauty: beautyPrompt,
-    certificateReview: certificateReviewPrompt,
-    beautyPromoPost: beautyPromoPostPrompt,
+interface PromptConfig {
+    apiType: 'chat' | 'responses';
+    model: string;
+    system?: string;
+    params: { [key: string]: any };
+}
+
+export const prompts: { [key: string]: PromptConfig } = {
+    beauty: beautyPromptConfig,
+    certificateReview: certificateReviewPromptConfig,
+    beautyPromoPost: beautyPromoPostPromptConfig,
 };
