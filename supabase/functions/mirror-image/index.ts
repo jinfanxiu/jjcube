@@ -1,5 +1,5 @@
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from 'npm:@google/generative-ai';
+import { serve } from 'STD/http/server.ts';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
@@ -63,33 +63,63 @@ function getPromptForLevel(level: number): string {
     return `${basePrompt}\n\n${levelPrompt}`;
 }
 
+const getLocalDateString = (date: Date): string => {
+    return new Intl.DateTimeFormat('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(date).replace(/\. /g, '-').replace('.', '');
+};
+
 serve(async (req) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders });
     }
 
     try {
+        const supabaseAdmin = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        );
+
         const authHeader = req.headers.get('Authorization');
         if (!authHeader) {
             throw new Error('인증 헤더가 없습니다.');
         }
 
-        const supabaseClient = createClient(
-            Deno.env.get('SUPABASE_URL') ?? '',
-            Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-            { global: { headers: { Authorization: authHeader } } }
-        );
+        const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
+        if (userError) throw new Error('사용자 인증에 실패했습니다: ' + userError.message);
+        if (!user) throw new Error('사용자를 찾을 수 없습니다.');
 
-        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-        if (userError || !user) throw new Error('사용자 인증에 실패했습니다.');
+        const { data: profile, error: profileError } = await supabaseAdmin
+            .from('profiles')
+            .select('image_credits, last_credit_update_at')
+            .eq('id', user.id)
+            .single();
 
-        const { data: initialCredits, error: rpcError } = await supabaseClient.rpc('reset_and_get_image_credits');
+        if (profileError) throw new Error('사용자 프로필을 조회하지 못했습니다.');
 
-        if (rpcError) {
-            throw new Error(`크레딧 확인 중 오류 발생: ${rpcError.message}`);
+        let currentCredits = profile.image_credits;
+
+        const lastUpdateDateStr = getLocalDateString(new Date(profile.last_credit_update_at));
+        const todayDateStr = getLocalDateString(new Date());
+
+        const needsCreditReset = lastUpdateDateStr < todayDateStr;
+
+        if (needsCreditReset) {
+            const dailyCredits = parseInt(Deno.env.get('DAILY_IMAGE_CREDITS') ?? '30', 10);
+            const { error: updateError } = await supabaseAdmin
+                .from('profiles')
+                .update({
+                    image_credits: dailyCredits,
+                    last_credit_update_at: new Date().toISOString(),
+                })
+                .eq('id', user.id);
+
+            if (updateError) throw updateError;
+            currentCredits = dailyCredits;
         }
-
-        const currentCredits = initialCredits as number;
 
         if (currentCredits <= 0) {
             return new Response(JSON.stringify({ error: '이미지 생성 크레딧이 부족합니다. 내일 다시 시도해주세요.' }), {
@@ -97,16 +127,6 @@ serve(async (req) => {
                 status: 429,
             });
         }
-
-        const { imageBase64, mimeType, variationLevel = 1 } = await req.json();
-        if (!imageBase64 || !mimeType) {
-            throw new Error('Image data or mimeType is missing.');
-        }
-
-        const supabaseAdmin = createClient(
-            Deno.env.get('SUPABASE_URL') ?? '',
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-        );
 
         const { error: decrementError } = await supabaseAdmin
             .from('profiles')
@@ -116,25 +136,39 @@ serve(async (req) => {
             })
             .eq('id', user.id);
 
-        if (decrementError) {
-            throw new Error(`크레딧 차감에 실패했습니다: ${decrementError.message}`);
+        if (decrementError) throw new Error('크레딧 차감에 실패했습니다: ' + decrementError.message);
+
+        const { imageBase64, mimeType, variationLevel = 1 } = await req.json();
+        if (!imageBase64 || !mimeType) {
+            throw new Error('Image data or mimeType is missing.');
         }
 
         const prompt = getPromptForLevel(variationLevel);
-        const imagePart = { inlineData: { data: imageBase64, mimeType } };
+
+        const imagePart = {
+            inlineData: {
+                data: imageBase64,
+                mimeType,
+            },
+        };
 
         const result = await model.generateContent([prompt, imagePart], safetySettings);
         const response = result.response;
 
+        console.log(JSON.stringify(response, null, 2));
+
         const imagePartFromResponse = response.candidates?.[0]?.content?.parts.find(part => part.inlineData);
 
         if (!imagePartFromResponse || !imagePartFromResponse.inlineData) {
-            throw new Error('모델이 이미지를 생성하지 못했습니다. 사용한 크레딧은 5분 내로 복구됩니다.');
+            throw new Error('모델이 이미지를 생성하지 못했습니다.');
         }
 
+        const generatedImageBase64 = imagePartFromResponse.inlineData.data;
+        const generatedMimeType = imagePartFromResponse.inlineData.mimeType;
+
         return new Response(JSON.stringify({
-            imageBase64: imagePartFromResponse.inlineData.data,
-            mimeType: imagePartFromResponse.inlineData.mimeType,
+            imageBase64: generatedImageBase64,
+            mimeType: generatedMimeType,
             remainingCredits: currentCredits - 1
         }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -142,8 +176,8 @@ serve(async (req) => {
         });
 
     } catch (error) {
-        console.error("## mirror-image 함수 오류:", error);
-        const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
+        console.error(error);
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
 
         let status = 500;
         let message = errorMessage;
