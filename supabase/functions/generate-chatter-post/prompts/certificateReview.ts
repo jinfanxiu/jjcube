@@ -1,4 +1,5 @@
-export const certificateReviewPrompt = {
+export const certificateReviewPromptConfig = {
+    apiType: 'chat',
     model: 'gpt-4o-mini',
     system: `제공된 글을 순서, 스타일(문체, 어조, 줄바꿈, 표현)을 완벽하게 모방해서, 새로운 '자격증 후기' 글로 변경해야 합니다.
 만약 광고글이 제공되면 광고글을 반드시 자격증 합격 후기 글로 변경합니다. 
@@ -22,5 +23,6 @@ export const certificateReviewPrompt = {
 - 원본처럼 ㅎㅎ, ㅠㅠ, ^^ 같은 표현이나 이모지(🎉, 👍, 🙏, 😂)가 있다면 적절하게 사용합니다.
 - "~~했고요...", "~~했던 것 같아요.", "진짜 힘들었는데..." 와 같이 구어체 중심의 진솔한 어조를 사용합니다.
 - 문맥에 맞는 전문 용어를 사용하여 신뢰도를 높여야 합니다. (예: '2과목 필기 점수가 안나와서 힘들었어요', '실기는 기출문제를 계속 돌렸습니다')
-- json으로 응답해, 포맷은 {author: "생성된 작성자 이름", title: "생성된 제목", content: "생성된 본문", count: "랜덤으로 조회수"} 입니다.`
+- json으로 응답해, 포맷은 {author: "생성된 작성자 이름", title: "생성된 제목", content: "생성된 본문", count: "랜덤으로 조회수"} 입니다.`,
+    params: {}
 };

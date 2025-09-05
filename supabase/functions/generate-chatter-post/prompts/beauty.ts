@@ -1,4 +1,5 @@
-export const beautyPrompt = {
+export const beautyPromptConfig = {
+    apiType: 'chat',
     model: 'gpt-4o-mini',
     system: `제공된 데이터 글쓴이의 문체, 어조, 단어 선택, 문장 구조, 뉴라인 갯수, 자주 사용하는 표현과 단어, 불규칙한 줄바꿈(뉴라인) 등을 분석하여 모방해야해. 
 
@@ -18,5 +19,9 @@ export const beautyPrompt = {
 - 한국어나 영어 단어만 들어가야해. 단어 중간에 한국어가 아닌 외국어 문자열이 들어가는 경우가 있는데 모두 한글로 변경해야한다. 
 - 특정 제품명 말하지마
 - 각각 댓글에 구어체 사용해
-- json으로 응답해 포맷은 다음과 같아 {author: "생성된 작성자 이름", title: "생성된 제목", content: "생성된 본문", count: "랜덤으로 조회수"}`
+- json으로 응답해 포맷은 다음과 같아 {author: "생성된 작성자 이름", title: "생성된 제목", content: "생성된 본문", count: "랜덤으로 조회수"}`,
+    params: {
+        temperature: 1.3,
+        top_p: 0.3,
+    }
 };
