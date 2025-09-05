@@ -55,18 +55,15 @@ serve(async (req) => {
         const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
         const userPrompt = `[제목] \n${sourceRecord.title || ''}\n[본문]\n${sourceRecord.content || ''}`;
 
-        console.log(`selectedModel: ${selectedModel}, selectedSystemPrompt: ${selectedSystemPrompt}, userPrompt: ${userPrompt}`);
         const response = await openai.chat.completions.create({
             model: selectedModel,
-            messages: [
-                { role: "system", content: selectedSystemPrompt },
-                { role: "user", content: userPrompt }
-            ],
-            // temperature: 1.3,
-            // top_p: 0.3,
+            messages: [{ role: "system", content: selectedSystemPrompt }, { role: "user", content: userPrompt }],
         });
 
-        const gptContent = response.choices[0].message.content || "";
+        let gptContent = response.choices[0].message.content || "";
+
+        gptContent = gptContent.replace(/\{nl\}/g, '\n');
+
         const jsonMatch = gptContent.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error("AI 응답에서 유효한 JSON 객체를 찾지 못했습니다.");
 

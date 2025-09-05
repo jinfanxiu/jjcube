@@ -12,7 +12,7 @@ const ImagePlaceholder: FC = () => {
                 사진 삽입 위치
             </div>
             <p className="text-sm text-gray-500">
-                이곳에 이미지가 표시됩니다.
+                이곳에 이미지를 업로드합니다.
             </p>
         </div>
     );
