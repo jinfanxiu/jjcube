@@ -57,4 +57,13 @@ export const generatorConfigs: GeneratorConfig[] = [
             },
         ],
     },
+    {
+        id: 'oliveYoungReview',
+        label: '올리브영 제품 리뷰',
+        pageTitle: '올리브영 제품 리뷰 생성기',
+        topic: 'oliveYoungReview',
+        categoryName: '[제품리뷰]',
+        description: '올리브영 제품에 대한 실감 나는 후기 게시글을 생성합니다.',
+        enableComments: false,
+    },
 ];

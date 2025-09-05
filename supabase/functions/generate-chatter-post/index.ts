@@ -4,6 +4,26 @@ import OpenAI from 'https://deno.land/x/openai@v4.52.7/mod.ts';
 import { corsHeaders } from '../_shared/cors.ts';
 import { prompts } from './prompts/index.ts';
 
+const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
+    {
+        type: 'function',
+        function: {
+            name: 'submit_generated_post',
+            description: '생성된 게시글의 제목, 작성자, 본문, 조회수를 제출합니다.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    author: { type: 'string', description: "생성된 작성자의 닉네임 (한글 또는 영어)" },
+                    title: { type: 'string', description: '생성된 게시글의 제목' },
+                    content: { type: 'string', description: '생성된 게시글의 본문 내용' },
+                    count: { type: 'number', description: '생성된 게시글의 랜덤 조회수' },
+                },
+                required: ["author", "title", "content", "count"],
+            },
+        },
+    },
+];
+
 serve(async (req) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders });
@@ -27,6 +47,9 @@ serve(async (req) => {
                 break;
             case 'beautyPromoPost':
                 tableIdentifier = 'beauty_promo_posts';
+                break;
+            case 'oliveYoungReview':
+                tableIdentifier = 'olive_young_reviews';
                 break;
             default:
                 throw new Error(`'${topic}'에 해당하는 테이블을 찾을 수 없습니다.`);
@@ -66,23 +89,28 @@ serve(async (req) => {
         const response = await openai.chat.completions.create({
             model: selectedModel,
             messages: [{ role: "system", content: finalSystemPrompt }, { role: "user", content: userPrompt }],
+            tools: tools,
+            tool_choice: { type: "function", function: { name: "submit_generated_post" } },
             ...modelParams
         });
 
-        let gptContent = response.choices[0].message.content || "";
+        const toolCall = response.choices[0].message.tool_calls?.[0];
+        if (!toolCall || toolCall.type !== 'function') {
+            throw new Error("AI 응답에서 유효한 함수 호출을 찾지 못했습니다.");
+        }
 
-        gptContent = gptContent.replace(/\{nl\}/g, '\n');
+        const parsedFromAI = JSON.parse(toolCall.function.arguments);
 
-        const jsonMatch = gptContent.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error("AI 응답에서 유효한 JSON 객체를 찾지 못했습니다.");
+        let generatedContent = parsedFromAI.content || "";
+        generatedContent = generatedContent.replace(/\{nl\}/g, '\n');
 
-        const parsedFromAI = JSON.parse(jsonMatch[0]);
         const generatedArticle = {
             author: "AI_Bot",
             title: "제목 생성 실패",
             content: "본문 생성 실패",
             count: 0,
-            ...parsedFromAI
+            ...parsedFromAI,
+            content: generatedContent,
         };
 
         const finalResponse = {

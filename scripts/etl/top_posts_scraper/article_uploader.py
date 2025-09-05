@@ -1,10 +1,11 @@
 import os
-from database_setup import db, Article, CertificateReview, BeautyPromoPost
+from database_setup import db, Article, CertificateReview, BeautyPromoPost, OliveYoungReview
 
 MODEL_MAP = {
     'articles': Article,
     'certificate_reviews': CertificateReview,
     'beauty_promo_posts': BeautyPromoPost,
+    'olive_young_reviews': OliveYoungReview,
 }
 
 
@@ -19,7 +20,8 @@ def upload_file_to_table(file_path: str, table_name: str):
 
     TargetModel = MODEL_MAP.get(table_name)
     if not TargetModel:
-        print(f"❌ 오류: 지원되지 않는 테이블명입니다 -> '{table_name}'. 'articles', 'certificate_reviews', 'beauty_promo_posts'를 사용하세요.")
+        valid_tables = ", ".join(f"'{k}'" for k in MODEL_MAP.keys())
+        print(f"❌ 오류: 지원되지 않는 테이블명입니다 -> '{table_name}'. {valid_tables}를 사용하세요.")
         return
 
     try:
@@ -70,13 +72,9 @@ def upload_file_to_table(file_path: str, table_name: str):
 if __name__ == '__main__':
     # ▼▼▼ 실행 전, 업로드할 파일 경로와 테이블명을 여기에 직접 입력하세요. ▼▼▼
 
-    # 예시 1: 뷰티 홍보글 업로드 시
-    file_to_upload = "/Users/jinfanxiu/jjcube/scripts/etl/top_posts_scraper/data/blog_1인피부샵창업.tsv"
-    target_table = "beauty_promo_posts"
-
-    # 예시 2: 자격증 후기 업로드 시
-    # file_to_upload = "/Users/jinfanxiu/jjcube/scripts/etl/top_posts_scraper/data/cafe_뷰티자격증합격_unprocessed.tsv"
-    # target_table = "certificate_reviews"
+    # 예시: 올리브영 리뷰 업로드 시
+    file_to_upload = "/Users/jinfanxiu/jjcube/scripts/etl/top_posts_scraper/data/blog_올리브영리뷰.tsv"
+    target_table = "olive_young_reviews"
 
     # ▲▲▲ 수정 후 파일을 저장하고 스크립트를 실행하세요. ▲▲▲
 

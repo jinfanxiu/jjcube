@@ -1,6 +1,7 @@
 import { beautyPromptConfig } from './beauty.ts';
 import { certificateReviewPromptConfig } from './certificateReview.ts';
 import { beautyPromoPostPromptConfig } from './beautyPromoPost.ts';
+import { oliveYoungReviewPromptConfig } from './oliveYoungReview.ts';
 
 interface PromptConfig {
     apiType: 'chat' | 'responses';
@@ -13,4 +14,5 @@ export const prompts: { [key: string]: PromptConfig } = {
     beauty: beautyPromptConfig,
     certificateReview: certificateReviewPromptConfig,
     beautyPromoPost: beautyPromoPostPromptConfig,
+    oliveYoungReview: oliveYoungReviewPromptConfig,
 };

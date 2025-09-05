@@ -38,3 +38,12 @@ class BeautyPromoPost(BaseModel):
 
     class Meta:
         table_name = 'beauty_promo_posts'
+
+class OliveYoungReview(BaseModel):
+    url = CharField(unique=True, max_length=512)
+    title = TextField()
+    content = TextField()
+    comments = TextField()
+
+    class Meta:
+        table_name = 'olive_young_reviews'
