@@ -10,7 +10,7 @@ interface Comment {
 
 interface PostGeneratorProps {
     pageTitle: string;
-    topic: 'beauty' | 'certificateReview';
+    topic: string; // 'beauty' | 'certificateReview' 에서 string으로 변경
     categoryName: string;
 }
 
@@ -166,7 +166,7 @@ const PostGenerator: FC<PostGeneratorProps> = ({ pageTitle, topic, categoryName 
                 </button>
             </div>
 
-            <div className="bg-gray-700 rounded-lg shadow-inner min-h-[400px] p-4">
+            <div className="bg-gray-700 rounded-lg shadow-inner min-h-[400px] p-6">
                 {error && <p className="text-red-400 text-center mb-4">오류: {error}</p>}
 
                 {(isPostLoading || isCommentsLoading) && (
