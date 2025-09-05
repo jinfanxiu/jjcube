@@ -1,6 +1,7 @@
-import { useState, Fragment } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import type { FC } from 'react';
 import { supabase } from '../../supabaseClient';
+import type { CustomOption } from '../../data/generatorConfig';
 import ImagePlaceholder from '../common/ImagePlaceholder';
 
 interface Comment {
@@ -14,6 +15,7 @@ interface PostGeneratorProps {
     topic: string;
     categoryName: string;
     enableComments: boolean;
+    customOptions?: CustomOption[];
 }
 
 const ProgressBar: FC = () => (
@@ -56,7 +58,7 @@ const CommentsSkeletonLoader: FC = () => (
 );
 
 
-const PostGenerator: FC<PostGeneratorProps> = ({ pageTitle, topic, categoryName, enableComments }) => {
+const PostGenerator: FC<PostGeneratorProps> = ({ pageTitle, topic, categoryName, enableComments, customOptions }) => {
     const [isPostLoading, setIsPostLoading] = useState(false);
     const [isCommentsLoading, setIsCommentsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -73,6 +75,27 @@ const PostGenerator: FC<PostGeneratorProps> = ({ pageTitle, topic, categoryName,
     const [postCopyText, setPostCopyText] = useState('본문 복사');
     const [copiedCommentIndex, setCopiedCommentIndex] = useState<number | null>(null);
 
+    const [customParams, setCustomParams] = useState<{ [key: string]: string }>({});
+
+    useEffect(() => {
+        const initialParams: { [key: string]: string } = {};
+        if (customOptions) {
+            customOptions.forEach(option => {
+                if (option.values.length > 0) {
+                    initialParams[option.paramKey] = option.values[0];
+                }
+            });
+        }
+        setCustomParams(initialParams);
+    }, [customOptions]);
+
+    const handleCustomParamChange = (paramKey: string, value: string) => {
+        setCustomParams(prevParams => ({
+            ...prevParams,
+            [paramKey]: value
+        }));
+    };
+
     const handleGeneratePost = async () => {
         setIsPostLoading(true);
         setError(null);
@@ -87,7 +110,10 @@ const PostGenerator: FC<PostGeneratorProps> = ({ pageTitle, topic, categoryName,
 
         try {
             const { data, error } = await supabase.functions.invoke('generate-chatter-post', {
-                body: { topic },
+                body: {
+                    topic,
+                    ...customParams
+                },
             });
 
             if (error) throw error;
@@ -167,6 +193,39 @@ const PostGenerator: FC<PostGeneratorProps> = ({ pageTitle, topic, categoryName,
                     {isPostLoading ? '본문 생성 중...' : '새 본문 생성'}
                 </button>
             </div>
+
+            {customOptions && customOptions.length > 0 && (
+                <div className="mb-6 bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    {customOptions.map((option) => (
+                        <div key={option.paramKey}>
+                            <label className="text-lg font-semibold text-gray-200 mb-3 block">{option.label}</label>
+                            <div className="flex flex-wrap gap-3">
+                                {option.values.map((value) => (
+                                    <div key={value}>
+                                        <input
+                                            type="radio"
+                                            id={`${option.paramKey}-${value}`}
+                                            name={option.paramKey}
+                                            value={value}
+                                            checked={customParams[option.paramKey] === value}
+                                            onChange={() => handleCustomParamChange(option.paramKey, value)}
+                                            className="sr-only peer"
+                                        />
+                                        <label
+                                            htmlFor={`${option.paramKey}-${value}`}
+                                            className="block cursor-pointer select-none rounded-lg border border-gray-600 p-2 px-4 text-center text-sm font-medium
+                                             peer-checked:bg-indigo-500 peer-checked:border-indigo-500 peer-checked:text-white
+                                             hover:bg-gray-700 transition-colors"
+                                        >
+                                            {value}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             <div className="bg-gray-700 rounded-lg shadow-inner min-h-[400px] p-6">
                 {error && <p className="text-red-400 text-center mb-4">오류: {error}</p>}

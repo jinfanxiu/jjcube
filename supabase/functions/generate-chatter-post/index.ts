@@ -10,7 +10,7 @@ serve(async (req) => {
     }
 
     try {
-        const { topic } = await req.json();
+        const { topic, brandName } = await req.json();
         const selectedPromptConfig = prompts[topic];
 
         if (!topic || !selectedPromptConfig) {
@@ -32,8 +32,13 @@ serve(async (req) => {
                 throw new Error(`'${topic}'에 해당하는 테이블을 찾을 수 없습니다.`);
         }
 
-        const selectedSystemPrompt = selectedPromptConfig.system;
+        let finalSystemPrompt = selectedPromptConfig.system || '';
+        if (topic === 'beautyPromoPost' && brandName) {
+            finalSystemPrompt = finalSystemPrompt.replace('{{BRAND_NAME}}', brandName);
+        }
+
         const selectedModel = selectedPromptConfig.model || 'gpt-4o-mini';
+        const modelParams = selectedPromptConfig.params || {};
 
         const supabaseAdmin = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
@@ -57,7 +62,8 @@ serve(async (req) => {
 
         const response = await openai.chat.completions.create({
             model: selectedModel,
-            messages: [{ role: "system", content: selectedSystemPrompt }, { role: "user", content: userPrompt }],
+            messages: [{ role: "system", content: finalSystemPrompt }, { role: "user", content: userPrompt }],
+            ...modelParams
         });
 
         let gptContent = response.choices[0].message.content || "";
