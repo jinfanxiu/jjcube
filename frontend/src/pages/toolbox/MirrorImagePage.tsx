@@ -22,22 +22,21 @@ const MirrorImagePage = () => {
     useEffect(() => {
         const fetchUserCredits = async () => {
             try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    const { data: profile, error } = await supabase
-                        .from('profiles')
-                        .select('image_credits')
-                        .eq('id', user.id)
-                        .single();
+                const { data, error } = await supabase.functions.invoke('get-user-credits');
 
-                    if (error) throw error;
-
-                    if (profile) {
-                        setImageCredits(profile.image_credits);
-                    }
+                if (error) {
+                    throw error;
                 }
-            } catch (error) {
-                console.error("크레딧 정보를 가져오는 데 실패했습니다:", error);
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                setImageCredits(data.credits);
+
+            } catch (e: any) {
+                console.error("크레딧 정보를 가져오는 데 실패했습니다:", e);
+                // 사용자에게 크레딧 정보를 보여주지 못하더라도 페이지 기능은 유지되도록 null 대신 오류 메시지를 표시하지는 않습니다.
             }
         };
 
@@ -82,8 +81,6 @@ const MirrorImagePage = () => {
             });
 
             if (error) {
-                // 이 error는 non-2xx 상태 코드로 인한 것이므로 catch 블록에서 처리됩니다.
-                // 여기서는 네트워크 문제 등 다른 종류의 에러를 대비해 throw 합니다.
                 throw error;
             }
 
@@ -98,8 +95,6 @@ const MirrorImagePage = () => {
         } catch (e: any) {
             console.error("이미지 생성 중 오류 발생:", e);
 
-            // Supabase 함수가 non-2xx 응답을 보낼 때 발생하는 오류를 처리합니다.
-            // e.context.json()을 통해 백엔드가 보낸 실제 JSON 오류 메시지를 얻을 수 있습니다.
             if (e.context && typeof e.context.json === 'function') {
                 try {
                     const errorJson = await e.context.json();
@@ -109,11 +104,9 @@ const MirrorImagePage = () => {
                         setError("알 수 없는 오류가 발생했습니다.");
                     }
                 } catch (jsonError) {
-                    // JSON 파싱에 실패한 경우, 원래의 기본 오류 메시지를 표시합니다.
                     setError(e.message || "이미지 처리 중 오류가 발생했습니다.");
                 }
             } else {
-                // 그 외 다른 종류의 오류일 경우
                 setError(e.message || "알 수 없는 오류가 발생했습니다.");
             }
         } finally {

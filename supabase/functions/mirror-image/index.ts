@@ -63,15 +63,6 @@ function getPromptForLevel(level: number): string {
     return `${basePrompt}\n\n${levelPrompt}`;
 }
 
-const getLocalDateString = (date: Date): string => {
-    return new Intl.DateTimeFormat('ko-KR', {
-        timeZone: 'Asia/Seoul',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-    }).format(date).replace(/\. /g, '-').replace('.', '');
-};
-
 serve(async (req) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders });
@@ -94,46 +85,23 @@ serve(async (req) => {
 
         const { data: profile, error: profileError } = await supabaseAdmin
             .from('profiles')
-            .select('image_credits, last_credit_update_at')
+            .select('image_credits')
             .eq('id', user.id)
             .single();
 
         if (profileError) throw new Error('사용자 프로필을 조회하지 못했습니다.');
 
-        let currentCredits = profile.image_credits;
-
-        const lastUpdateDateStr = getLocalDateString(new Date(profile.last_credit_update_at));
-        const todayDateStr = getLocalDateString(new Date());
-
-        const needsCreditReset = lastUpdateDateStr < todayDateStr;
-
-        if (needsCreditReset) {
-            const dailyCredits = parseInt(Deno.env.get('DAILY_IMAGE_CREDITS') ?? '30', 10);
-            const { error: updateError } = await supabaseAdmin
-                .from('profiles')
-                .update({
-                    image_credits: dailyCredits,
-                    last_credit_update_at: new Date().toISOString(),
-                })
-                .eq('id', user.id);
-
-            if (updateError) throw updateError;
-            currentCredits = dailyCredits;
-        }
-
-        if (currentCredits <= 0) {
+        if (profile.image_credits <= 0) {
             return new Response(JSON.stringify({ error: '이미지 생성 크레딧이 부족합니다. 내일 다시 시도해주세요.' }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 429,
             });
         }
 
+        const newCredits = profile.image_credits - 1;
         const { error: decrementError } = await supabaseAdmin
             .from('profiles')
-            .update({
-                image_credits: currentCredits - 1,
-                last_credit_update_at: new Date().toISOString(),
-            })
+            .update({ image_credits: newCredits })
             .eq('id', user.id);
 
         if (decrementError) throw new Error('크레딧 차감에 실패했습니다: ' + decrementError.message);
@@ -169,7 +137,7 @@ serve(async (req) => {
         return new Response(JSON.stringify({
             imageBase64: generatedImageBase64,
             mimeType: generatedMimeType,
-            remainingCredits: currentCredits - 1
+            remainingCredits: newCredits
         }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
