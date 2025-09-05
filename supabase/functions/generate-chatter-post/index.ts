@@ -10,7 +10,7 @@ serve(async (req) => {
     }
 
     try {
-        const { topic, brandName } = await req.json();
+        const { topic, brandName, certificateType } = await req.json();
         const selectedPromptConfig = prompts[topic];
 
         if (!topic || !selectedPromptConfig) {
@@ -34,7 +34,10 @@ serve(async (req) => {
 
         let finalSystemPrompt = selectedPromptConfig.system || '';
         if (topic === 'beautyPromoPost' && brandName) {
-            finalSystemPrompt = finalSystemPrompt.replace('{{BRAND_NAME}}', brandName);
+            finalSystemPrompt = finalSystemPrompt.replace(/\{\{BRAND_NAME\}\}/g, brandName);
+        }
+        if (topic === 'certificateReview' && certificateType) {
+            finalSystemPrompt = finalSystemPrompt.replace(/\{\{CERTIFICATE_TYPE\}\}/g, certificateType);
         }
 
         const selectedModel = selectedPromptConfig.model || 'gpt-4o-mini';

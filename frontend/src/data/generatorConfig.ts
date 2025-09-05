@@ -33,6 +33,13 @@ export const generatorConfigs: GeneratorConfig[] = [
         categoryName: '[합격후기]',
         description: '두피 및 피부 자격증 합격 경험을 공유하고 다른 사람들에게 동기를 부여하는 후기를 생성합니다.',
         enableComments: true,
+        customOptions: [
+            {
+                paramKey: 'certificateType',
+                label: '자격증 종류 선택',
+                values: ['두피', '피부'],
+            },
+        ],
     },
     {
         id: 'beautyPromoPost',
