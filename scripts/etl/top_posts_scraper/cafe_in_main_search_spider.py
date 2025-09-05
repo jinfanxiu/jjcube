@@ -45,7 +45,7 @@ class CafeSearchSpider(ArticleSpider):
         self.cnt = ""
 
         # settings
-        self.keywords = ['피부자격증합격후기']
+        self.keywords = ['뷰티자격증합격']
 
     def start_requests(self):
         for keyword in self.keywords:
@@ -82,7 +82,7 @@ class CafeSearchSpider(ArticleSpider):
                 url = f"https://cafe.naver.com/{cafe_id}/{article_id}?{url_obj.query}"
                 yield scrapy.Request(url=url, callback=self.parse_cafe_article, meta={'article_id': article_id, 'w': response.meta['w']})
 
-        if self.cnt == 0 or response.meta['page'] > 31:
+        if self.cnt == 0 or response.meta['page'] > 3:
             return
 
         keyword = response.meta['keyword']
@@ -113,7 +113,7 @@ class CafeSearchSpider(ArticleSpider):
 
     def get_date_string_pair(self, days):
         date = []
-        t = datetime(2025,1, 1)
+        t = datetime(2024,1, 1)
         while (datetime.now() > t):
             if days == 0:
                 t1 = t

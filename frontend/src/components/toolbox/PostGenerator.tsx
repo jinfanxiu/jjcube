@@ -154,20 +154,20 @@ const PostGenerator: FC<PostGeneratorProps> = ({ pageTitle, topic, categoryName 
     const isLoading = isPostLoading || isCommentsLoading;
 
     return (
-        <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-10 w-full font-sans">
+        <div className="bg-gray-800 rounded-lg shadow-xl p-4 sm:p-6 w-full font-sans border border-gray-700">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold">{pageTitle}</h2>
+                <h2 className="text-xl font-bold text-white">{pageTitle}</h2>
                 <button
                     onClick={handleGeneratePost}
                     disabled={isLoading}
-                    className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 disabled:bg-gray-400"
+                    className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 disabled:bg-gray-500"
                 >
                     {isPostLoading ? '본문 생성 중...' : '새 본문 생성'}
                 </button>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md min-h-[400px] p-6">
-                {error && <p className="text-red-500 text-center mb-4">오류: {error}</p>}
+            <div className="bg-gray-700 rounded-lg shadow-inner min-h-[400px] p-4">
+                {error && <p className="text-red-400 text-center mb-4">오류: {error}</p>}
 
                 {(isPostLoading || isCommentsLoading) && (
                     <div className="mb-6">
@@ -181,27 +181,27 @@ const PostGenerator: FC<PostGeneratorProps> = ({ pageTitle, topic, categoryName 
                     <article>
                         <header className="mb-4">
                             <div>
-                                <span className="text-indigo-600 font-bold text-sm">{categoryName}</span>
+                                <span className="text-indigo-400 font-bold text-sm">{categoryName}</span>
                             </div>
-                            <h1 className="text-2xl font-extrabold text-gray-900 mt-2">{generatedTitle}</h1>
+                            <h1 className="text-2xl font-extrabold text-white mt-2">{generatedTitle}</h1>
                             <div className="flex justify-between items-center mt-4">
                                 <div className="flex items-center space-x-2">
-                                    <div className="h-8 w-8 rounded-full bg-gray-200"></div>
-                                    <span className="font-semibold text-gray-800">{generatedAuthor}</span>
+                                    <div className="h-8 w-8 rounded-full bg-gray-600"></div>
+                                    <span className="font-semibold text-gray-200">{generatedAuthor}</span>
                                 </div>
-                                <div className="text-sm text-gray-500">
+                                <div className="text-sm text-gray-400">
                                     <span>댓글 {generatedComments.length}</span>
                                 </div>
                             </div>
                         </header>
-                        <hr className="my-4" />
-                        <div className="prose prose-lg max-w-none text-gray-800 whitespace-pre-wrap mb-6">
+                        <hr className="my-4 border-gray-600" />
+                        <div className="prose prose-lg max-w-none text-gray-300 prose-invert whitespace-pre-wrap mb-6">
                             {generatedContent}
                         </div>
 
-                        <footer className="border-t border-gray-200 pt-4 flex justify-between items-center text-gray-500">
+                        <footer className="border-t border-gray-600 pt-4 flex justify-between items-center text-gray-400">
                             <div className="flex space-x-4">
-                                <button onClick={handleLikeClick} className={`flex items-center space-x-1 transition-colors ${isPostLiked ? 'text-red-500' : 'hover:text-red-500'}`}>
+                                <button onClick={handleLikeClick} className={`flex items-center space-x-1 transition-colors ${isPostLiked ? 'text-red-500' : 'hover:text-red-400'}`}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                         <path fillRule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
                                     </svg>
@@ -215,19 +215,19 @@ const PostGenerator: FC<PostGeneratorProps> = ({ pageTitle, topic, categoryName 
                                 </div>
                             </div>
                             <div className="flex space-x-4 text-sm">
-                                <button onClick={handleCopyPost} className="bg-gray-200 text-gray-800 text-xs font-bold py-1 px-3 rounded-md hover:bg-gray-300">
+                                <button onClick={handleCopyPost} className="bg-gray-600 text-gray-100 text-xs font-bold py-1 px-3 rounded-md hover:bg-gray-500">
                                     {postCopyText}
                                 </button>
                             </div>
                         </footer>
 
-                        <hr className="my-6" />
+                        <hr className="my-6 border-gray-600" />
 
                         <div className="mt-4">
                             <button
                                 onClick={handleGenerateComments}
                                 disabled={!generatedContent || isLoading}
-                                className="w-full bg-teal-500 text-white font-bold py-2 px-4 rounded-md hover:bg-teal-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                className="w-full bg-teal-500 text-white font-bold py-2 px-4 rounded-md hover:bg-teal-600 disabled:bg-gray-500 disabled:cursor-not-allowed"
                             >
                                 {isCommentsLoading ? '댓글 생성 중...' : '댓글 생성하기'}
                             </button>
@@ -239,20 +239,20 @@ const PostGenerator: FC<PostGeneratorProps> = ({ pageTitle, topic, categoryName 
                                     {generatedComments.map((comment, index) => (
                                         <div key={`${comment.nickname}-${index}`} className={`flex items-start space-x-3 ${comment.replyTo ? 'ml-8' : ''}`}>
                                             <div className="flex-shrink-0">
-                                                <div title={comment.nickname} className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm">
+                                                <div title={comment.nickname} className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center text-gray-300 font-bold text-sm">
                                                     {comment.nickname.substring(0, 1)}
                                                 </div>
                                             </div>
-                                            <div className="flex-1 bg-gray-100 rounded-lg p-3 relative">
-                                                <p className="font-semibold text-sm text-gray-800">{comment.nickname}</p>
+                                            <div className="flex-1 bg-gray-800 rounded-lg p-3 relative">
+                                                <p className="font-semibold text-sm text-gray-200">{comment.nickname}</p>
                                                 {comment.replyTo && (
-                                                    <p className="text-xs text-indigo-600 font-medium">@{comment.replyTo}에게 답글</p>
+                                                    <p className="text-xs text-indigo-400 font-medium">@{comment.replyTo}에게 답글</p>
                                                 )}
-                                                <p className="text-sm text-gray-700 whitespace-pre-wrap mt-1">{comment.commentText}</p>
+                                                <p className="text-sm text-gray-300 whitespace-pre-wrap mt-1">{comment.commentText}</p>
 
                                                 <button
                                                     onClick={() => handleCopySingleComment(comment.commentText, index)}
-                                                    className="absolute top-2 right-2 bg-gray-200 text-gray-800 text-xs font-bold py-1 px-2 rounded-md hover:bg-gray-300"
+                                                    className="absolute top-2 right-2 bg-gray-600 text-gray-200 text-xs font-bold py-1 px-2 rounded-md hover:bg-gray-500"
                                                 >
                                                     {copiedCommentIndex === index ? '복사 완료!' : '복사'}
                                                 </button>
@@ -264,7 +264,7 @@ const PostGenerator: FC<PostGeneratorProps> = ({ pageTitle, topic, categoryName 
                         </div>
                     </article>
                 ) : (
-                    <div className="text-center text-gray-500 flex items-center justify-center h-full">
+                    <div className="text-center text-gray-400 flex items-center justify-center h-full">
                         <p>'새 본문 생성' 버튼을 클릭하여 시작하세요.</p>
                     </div>
                 )}

@@ -6,8 +6,7 @@ import PendingApprovalPage from '../pages/auth/PendingApprovalPage';
 import AdminPage from '../pages/admin/AdminPage';
 import MirrorImagePage from '../pages/toolbox/MirrorImagePage';
 import { useAuth } from '../context/AuthProvider';
-import ChatterPostGeneratorPage from "../pages/toolbox/ChatterPostGeneratorPage";
-import CertificateReviewGeneratorPage from '../pages/toolbox/CertificateReviewGeneratorPage';
+import UnifiedGeneratorPage from '../pages/toolbox/UnifiedGeneratorPage';
 
 const AppRoutes = () => {
     const { session, profile, loading } = useAuth();
@@ -32,8 +31,7 @@ const AppRoutes = () => {
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/toolbox" element={<ToolboxPage />} />
                     <Route path="/toolbox/mirror-image" element={<MirrorImagePage />} />
-                    <Route path="/toolbox/chatter-post-generator" element={<ChatterPostGeneratorPage />} />
-                    <Route path="/toolbox/certificate-review-generator" element={<CertificateReviewGeneratorPage />} />
+                    <Route path="/toolbox/post-generator" element={<UnifiedGeneratorPage />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                 </>
             );
@@ -45,8 +43,7 @@ const AppRoutes = () => {
                     <>
                         <Route path="/toolbox" element={<ToolboxPage />} />
                         <Route path="/toolbox/mirror-image" element={<MirrorImagePage />} />
-                        <Route path="/toolbox/chatter-post-generator" element={<ChatterPostGeneratorPage />} />
-                        <Route path="/toolbox/certificate-review-generator" element={<CertificateReviewGeneratorPage />} />
+                        <Route path="/toolbox/post-generator" element={<UnifiedGeneratorPage />} />
                         <Route path="*" element={<Navigate to="/toolbox" replace />} />
                     </>
                 );

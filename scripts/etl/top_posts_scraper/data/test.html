@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>JUMUNIO 로고 미리보기</title>
+<style>
+  :root{--bg:#f7f7f8;--card:#fff;--accent:#D92D2D;}
+  body{font-family:Inter, Pretendard, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:var(--bg); margin:0; padding:32px; color:#111}
+  .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start}
+  .preview{background:var(--card);padding:28px;border-radius:12px;box-shadow:0 6px 20px rgba(16,24,40,0.06)}
+  .controls{background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 20px rgba(16,24,40,0.06);height:fit-content}
+  h1{font-size:20px;margin:0 0 12px 0}
+  .variants{display:flex;gap:10px;margin:12px 0}
+  button{cursor:pointer;border:0;padding:10px 14px;border-radius:8px;background:#111;color:white;font-weight:600}
+  .secondary{background:transparent;border:1px solid #e6e6e6;color:#222}
+  .svg-holder{display:flex;align-items:center;justify-content:center;min-height:220px;border-radius:10px;background:linear-gradient(180deg, #fff, #fbfbfb);padding:20px}
+  .download{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  a.btn{display:inline-block;padding:10px 12px;border-radius:8px;text-decoration:none;border:1px solid #eee;background:white;color:#111;font-weight:600}
+  .note{font-size:13px;color:#666;margin-top:12px}
+  .wordmark{margin-top:18px;text-align:center}
+  .small{font-size:13px;color:#666;margin-top:8px}
+  pre.svgcode{max-height:260px;overflow:auto;background:#0b1220;color:#e6eef8;padding:12px;border-radius:8px;font-size:12px}
+  @media (max-width:980px){.wrap{grid-template-columns:1fr; padding:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="preview">
+    <h1>JUMUNIO 로고 미리보기</h1>
+    <div class="variants">
+      <button id="showIcon" class="secondary">아이콘만</button>
+      <button id="showEn">영문 (JUMUNIO)</button>
+      <button id="showKr">한글 (주문이오)</button>
+    </div>
+
+    <div id="display" class="svg-holder" aria-live="polite">
+      <!-- default loads the English lockup embedded inline -->
+      <!-- English lockup SVG -->
+      <svg id="svgEn" width="720" height="210" viewBox="0 0 960 280" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JUMUNIO brand logo">
+        <defs>
+          <linearGradient id="r" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#FF4D4D"/>
+            <stop offset="1" stop-color="#D92D2D"/>
+          </linearGradient>
+        </defs>
+
+        <g transform="translate(16,12) scale(0.9)">
+          <rect x="0" y="0" width="144" height="144" rx="16" fill="url(#r)"/>
+          <rect x="16" y="16" width="40" height="40" rx="6" fill="white"/>
+          <rect x="24" y="24" width="24" height="24" rx="4" fill="url(#r)"/>
+          <rect x="88" y="16" width="40" height="40" rx="6" fill="white"/>
+          <rect x="96" y="24" width="24" height="24" rx="4" fill="url(#r)"/>
+          <rect x="16" y="88" width="40" height="40" rx="6" fill="white"/>
+          <rect x="24" y="96" width="24" height="24" rx="4" fill="url(#r)"/>
+          <rect x="72" y="72" width="12" height="12" rx="2" fill="white"/>
+          <rect x="108" y="84" width="12" height="12" rx="2" fill="white"/>
+          <rect x="84" y="108" width="12" height="12" rx="2" fill="white"/>
+          <rect x="60" y="96" width="8" height="8" rx="2" fill="white"/>
+          <rect x="48" y="72" width="8" height="8" rx="2" fill="white"/>
+          <rect x="96" y="60" width="8" height="8" rx="2" fill="white"/>
+          <g transform="translate(128,96)">
+            <rect x="0" y="-56" width="112" height="168" rx="20" fill="url(#r)"/>
+            <rect x="10" y="-46" width="92" height="136" rx="12" fill="white"/>
+            <circle cx="56" cy="96" r="6" fill="url(#r)"/>
+            <path d="M30,54 h52 a22,22 0 0 1 -22,22 h-8 a22,22 0 0 1 -22,-22z" fill="url(#r)"/>
+            <path d="M46,34 c-4,-8 10,-10 6,-20" stroke="#D92D2D" stroke-width="4" stroke-linecap="round" fill="none"/>
+            <path d="M60,34 c-4,-8 10,-10 6,-20" stroke="#D92D2D" stroke-width="4" stroke-linecap="round" fill="none"/>
+          </g>
+        </g>
+
+        <g transform="translate(360,170)">
+          <text x="0" y="0" font-family="Inter, SF Pro Display, Pretendard, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-weight="800" font-size="120" fill="#111111" letter-spacing="4">JUMUNIO</text>
+        </g>
+      </svg>
+
+      <!-- Icon-only (hidden by default) -->
+      <svg id="svgIcon" width="220" height="220" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JUMUNIO icon: QR + phone with steaming bowl" style="display:none">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#FF4D4D"/>
+            <stop offset="1" stop-color="#D92D2D"/>
+          </linearGradient>
+        </defs>
+
+        <g transform="translate(16,16)">
+          <rect x="0" y="0" width="144" height="144" rx="16" fill="url(#g)"/>
+          <rect x="16" y="16" width="40" height="40" rx="6" fill="white"/>
+          <rect x="24" y="24" width="24" height="24" rx="4" fill="url(#g)"/>
+          <rect x="88" y="16" width="40" height="40" rx="6" fill="white"/>
+          <rect x="96" y="24" width="24" height="24" rx="4" fill="url(#g)"/>
+          <rect x="16" y="88" width="40" height="40" rx="6" fill="white"/>
+          <rect x="24" y="96" width="24" height="24" rx="4" fill="url(#g)"/>
+          <rect x="72" y="72" width="12" height="12" rx="2" fill="white"/>
+          <rect x="108" y="84" width="12" height="12" rx="2" fill="white"/>
+          <rect x="84" y="108" width="12" height="12" rx="2" fill="white"/>
+          <rect x="60" y="96" width="8" height="8" rx="2" fill="white"/>
+          <rect x="48" y="72" width="8" height="8" rx="2" fill="white"/>
+          <rect x="96" y="60" width="8" height="8" rx="2" fill="white"/>
+        </g>
+
+        <g transform="translate(128,112)">
+          <rect x="0" y="-56" width="112" height="168" rx="20" fill="url(#g)"/>
+          <rect x="10" y="-46" width="92" height="136" rx="12" fill="white"/>
+          <circle cx="56" cy="96" r="6" fill="url(#g)"/>
+          <path d="M30,54 h52 a22,22 0 0 1 -22,22 h-8 a22,22 0 0 1 -22,-22z" fill="url(#g)"/>
+          <path d="M46,34 c-4,-8 10,-10 6,-20" stroke="#D92D2D" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <path d="M60,34 c-4,-8 10,-10 6,-20" stroke="#D92D2D" stroke-width="4" stroke-linecap="round" fill="none"/>
+        </g>
+      </svg>
+
+      <!-- Korean lockup (hidden by default) -->
+      <svg id="svgKr" width="720" height="210" viewBox="0 0 960 280" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문이오 브랜드 로고" style="display:none">
+        <defs>
+          <linearGradient id="r2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#FF4D4D"/>
+            <stop offset="1" stop-color="#D92D2D"/>
+          </linearGradient>
+        </defs>
+
+        <g transform="translate(16,12) scale(0.9)">
+          <rect x="0" y="0" width="144" height="144" rx="16" fill="url(#r2)"/>
+          <rect x="16" y="16" width="40" height="40" rx="6" fill="white"/>
+          <rect x="24" y="24" width="24" height="24" rx="4" fill="url(#r2)"/>
+          <rect x="88" y="16" width="40" height="40" rx="6" fill="white"/>
+          <rect x="96" y="24" width="24" height="24" rx="4" fill="url(#r2)"/>
+          <rect x="16" y="88" width="40" height="40" rx="6" fill="white"/>
+          <rect x="24" y="96" width="24" height="24" rx="4" fill="url(#r2)"/>
+          <rect x="72" y="72" width="12" height="12" rx="2" fill="white"/>
+          <rect x="108" y="84" width="12" height="12" rx="2" fill="white"/>
+          <rect x="84" y="108" width="12" height="12" rx="2" fill="white"/>
+          <rect x="60" y="96" width="8" height="8" rx="2" fill="white"/>
+          <rect x="48" y="72" width="8" height="8" rx="2" fill="white"/>
+          <rect x="96" y="60" width="8" height="8" rx="2" fill="white"/>
+          <g transform="translate(128,96)">
+            <rect x="0" y="-56" width="112" height="168" rx="20" fill="url(#r2)"/>
+            <rect x="10" y="-46" width="92" height="136" rx="12" fill="white"/>
+            <circle cx="56" cy="96" r="6" fill="url(#r2)"/>
+            <path d="M30,54 h52 a22,22 0 0 1 -22,22 h-8 a22,22 0 0 1 -22,-22z" fill="url(#r2)"/>
+            <path d="M46,34 c-4,-8 10,-10 6,-20" stroke="#D92D2D" stroke-width="4" stroke-linecap="round" fill="none"/>
+            <path d="M60,34 c-4,-8 10,-10 6,-20" stroke="#D92D2D" stroke-width="4" stroke-linecap="round" fill="none"/>
+          </g>
+        </g>
+
+        <g transform="translate(360,170)">
+          <text x="0" y="0" font-family="Pretendard, Apple SD Gothic Neo, NanumSquare, Noto Sans KR, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-weight="900" font-size="120" fill="#111111">주문이오</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="wordmark small">아이콘 내부의 체크표시를 <strong>그릇 + 스팀</strong>으로 대체했습니다.</div>
+
+    <div class="note">원본 SVG 파일도 같이 내려받을 수 있습니다.</div>
+    <div class="download">
+      <a class="btn" href="/mnt/data/jumunio_icon.svg" download="jumunio_icon.svg">아이콘 SVG 다운로드</a>
+      <a class="btn" href="/mnt/data/jumunio_full_en.svg" download="jumunio_full_en.svg">영문 락업 SVG 다운로드</a>
+      <a class="btn" href="/mnt/data/jumunio_full_kr.svg" download="jumunio_full_kr.svg">한글 락업 SVG 다운로드</a>
+    </div>
+  </div>
+
+  <aside class="controls">
+    <h1>사용법</h1>
+    <ol>
+      <li>아래 버튼으로 아이콘/영문/한글 버전을 전환하세요.</li>
+      <li>우측의 SVG 다운로드 버튼으로 원본 파일을 내려받아 수정하거나 인쇄에 사용하세요.</li>
+    </ol>
+    <div class="small">원하시면 색상(예: 블랙, 화이트, 단색), 여백, 또는 다른 심볼(포크/스푼 등)로 바로 바꿔드릴게요.</div>
+    <hr style="margin:12px 0;border:none;border-top:1px solid #eee" />
+    <div class="small"><strong>팁:</strong> 브라우저에서 파일을 열어 보세요. (예: Chrome, Edge, Safari)</div>
+  </aside>
+</div>
+
+<script>
+  const en = document.getElementById('svgEn');
+  const kr = document.getElementById('svgKr');
+  const icon = document.getElementById('svgIcon');
+  const showEn = document.getElementById('showEn');
+  const showKr = document.getElementById('showKr');
+  const showIcon = document.getElementById('showIcon');
+  function show(which){
+    en.style.display = 'none';
+    kr.style.display = 'none';
+    icon.style.display = 'none';
+    if(which === 'en') en.style.display = '';
+    if(which === 'kr') kr.style.display = '';
+    if(which === 'icon') icon.style.display = '';
+  }
+  showEn.addEventListener('click',()=>show('en'));
+  showKr.addEventListener('click',()=>show('kr'));
+  showIcon.addEventListener('click',()=>show('icon'));
+
+  // default: english visible
+  show('en');
+</script>
+</body>
+</html>

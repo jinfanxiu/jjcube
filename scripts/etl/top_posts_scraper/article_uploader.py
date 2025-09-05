@@ -70,7 +70,7 @@ if __name__ == '__main__':
     # ▼▼▼ 실행 전, 업로드할 파일 경로와 테이블명을 여기에 직접 입력하세요. ▼▼▼
 
     # 예시 1: 자격증 후기 업로드 시
-    file_to_upload = "/Users/jinfanxiu/jjcube/scripts/etl/top_posts_scraper/data/cafe_피부자격증합격후기_unprocessed.tsv"
+    file_to_upload = "/Users/jinfanxiu/jjcube/scripts/etl/top_posts_scraper/data/cafe_뷰티자격증합격_unprocessed.tsv"
     target_table = "certificate_reviews"
 
     # 예시 2: 뷰티 게시글 업로드 시 (아래 두 줄의 주석을 해제하고 위 두 줄을 주석 처리)
