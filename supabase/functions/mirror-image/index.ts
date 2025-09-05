@@ -1,8 +1,7 @@
-import { serve } from 'STD/http/server.ts';
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from 'npm:@google/generative-ai';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// --- 기존 설정 (유지) ---
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 if (!GEMINI_API_KEY) {
     console.error("GEMINI_API_KEY is not set.");
@@ -51,7 +50,7 @@ function getPromptForLevel(level: number): string {
 6.사람의 동작 자세의 각도나 위치를 아주 살짝 변경시켜
 `;
             break
-        default: // Default to Level 1
+        default:
             levelPrompt = `아래 요청사항에 따라 이미지 변경해 준 뒤 생성된 이미지 데이터 전송해줘
 1.인물 생김새 유지: 원본 인물 그대로 유지해야해, 사진의 구조도 유지해 
 2.다양한 변화: 사물/가구/소품의 위치와 색상, 의상 색상을 어색하지 않게 변경해. 흰색 사물의 색은 변경 금지
@@ -64,66 +63,51 @@ function getPromptForLevel(level: number): string {
     return `${basePrompt}\n\n${levelPrompt}`;
 }
 
-// --- 수정된 serve 함수 ---
 serve(async (req) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders });
     }
 
     try {
-        // === 크레딧 시스템 로직 시작 ===
-        const supabaseAdmin = createClient(
-            Deno.env.get('SUPABASE_URL') ?? '',
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-        );
-
         const authHeader = req.headers.get('Authorization');
         if (!authHeader) {
             throw new Error('인증 헤더가 없습니다.');
         }
 
-        const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
-        if (userError) throw new Error('사용자 인증에 실패했습니다: ' + userError.message);
-        if (!user) throw new Error('사용자를 찾을 수 없습니다.');
+        const supabaseClient = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+            { global: { headers: { Authorization: authHeader } } }
+        );
 
-        const { data: profile, error: profileError } = await supabaseAdmin
-            .from('profiles')
-            .select('image_credits, last_credit_update_at')
-            .eq('id', user.id)
-            .single();
+        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+        if (userError || !user) throw new Error('사용자 인증에 실패했습니다.');
 
-        if (profileError) throw new Error('사용자 프로필을 조회하지 못했습니다.');
+        const { data: initialCredits, error: rpcError } = await supabaseClient.rpc('reset_and_get_image_credits');
 
-        let currentCredits = profile.image_credits;
-        const lastUpdate = new Date(profile.last_credit_update_at);
-        const today = new Date();
-        const isLastUpdateBeforeToday =
-            lastUpdate.getUTCFullYear() < today.getUTCFullYear() ||
-            (lastUpdate.getUTCFullYear() === today.getUTCFullYear() && lastUpdate.getUTCMonth() < today.getUTCMonth()) ||
-            (lastUpdate.getUTCFullYear() === today.getUTCFullYear() && lastUpdate.getUTCMonth() === today.getUTCMonth() && lastUpdate.getUTCDate() < today.getUTCDate());
-
-        if (isLastUpdateBeforeToday) {
-            const dailyCredits = parseInt(Deno.env.get('DAILY_IMAGE_CREDITS') ?? '30', 10);
-            const { error: updateError } = await supabaseAdmin
-                .from('profiles')
-                .update({
-                    image_credits: dailyCredits,
-                    last_credit_update_at: new Date().toISOString(),
-                })
-                .eq('id', user.id);
-
-            if (updateError) throw updateError;
-            currentCredits = dailyCredits;
+        if (rpcError) {
+            throw new Error(`크레딧 확인 중 오류 발생: ${rpcError.message}`);
         }
+
+        const currentCredits = initialCredits as number;
 
         if (currentCredits <= 0) {
             return new Response(JSON.stringify({ error: '이미지 생성 크레딧이 부족합니다. 내일 다시 시도해주세요.' }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 429, // Too Many Requests
+                status: 429,
             });
         }
 
-        // 크레딧이 충분하므로, 1 차감 (이미지 생성 성공 여부와 관계없이 요청 시점에 차감)
+        const { imageBase64, mimeType, variationLevel = 1 } = await req.json();
+        if (!imageBase64 || !mimeType) {
+            throw new Error('Image data or mimeType is missing.');
+        }
+
+        const supabaseAdmin = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        );
+
         const { error: decrementError } = await supabaseAdmin
             .from('profiles')
             .update({
@@ -132,53 +116,34 @@ serve(async (req) => {
             })
             .eq('id', user.id);
 
-        if (decrementError) throw new Error('크레딧 차감에 실패했습니다: ' + decrementError.message);
-        // === 크레딧 시스템 로직 종료 ===
-
-
-        // --- 기존 이미지 생성 로직 시작 (유지) ---
-        const { imageBase64, mimeType, variationLevel = 1 } = await req.json();
-        if (!imageBase64 || !mimeType) {
-            throw new Error('Image data or mimeType is missing.');
+        if (decrementError) {
+            throw new Error(`크레딧 차감에 실패했습니다: ${decrementError.message}`);
         }
 
         const prompt = getPromptForLevel(variationLevel);
-
-        const imagePart = {
-            inlineData: {
-                data: imageBase64,
-                mimeType,
-            },
-        };
+        const imagePart = { inlineData: { data: imageBase64, mimeType } };
 
         const result = await model.generateContent([prompt, imagePart], safetySettings);
         const response = result.response;
 
-        console.log(JSON.stringify(response, null, 2));
-
         const imagePartFromResponse = response.candidates?.[0]?.content?.parts.find(part => part.inlineData);
 
         if (!imagePartFromResponse || !imagePartFromResponse.inlineData) {
-            // 크레딧은 이미 차감되었으므로, 생성 실패에 대한 메시지만 반환
-            throw new Error('모델이 이미지를 생성하지 못했습니다.');
+            throw new Error('모델이 이미지를 생성하지 못했습니다. 사용한 크레딧은 5분 내로 복구됩니다.');
         }
 
-        const generatedImageBase64 = imagePartFromResponse.inlineData.data;
-        const generatedMimeType = imagePartFromResponse.inlineData.mimeType;
-
         return new Response(JSON.stringify({
-            imageBase64: generatedImageBase64,
-            mimeType: generatedMimeType,
+            imageBase64: imagePartFromResponse.inlineData.data,
+            mimeType: imagePartFromResponse.inlineData.mimeType,
             remainingCredits: currentCredits - 1
         }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
         });
-        // --- 기존 이미지 생성 로직 종료 ---
 
     } catch (error) {
-        console.error(error);
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        console.error("## mirror-image 함수 오류:", error);
+        const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
 
         let status = 500;
         let message = errorMessage;
