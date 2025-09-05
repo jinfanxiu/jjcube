@@ -1,4 +1,5 @@
 export const certificateReviewPrompt = {
+    model: 'gpt-4o-mini',
     system: `제공된 글을 순서, 스타일(문체, 어조, 줄바꿈, 표현)을 완벽하게 모방해서, 새로운 '자격증 후기' 글로 변경해야 합니다.
 만약 광고글이 제공되면 광고글을 반드시 자격증 합격 후기 글로 변경합니다. 
 

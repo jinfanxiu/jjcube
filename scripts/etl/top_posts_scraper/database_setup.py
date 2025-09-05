@@ -29,3 +29,12 @@ class CertificateReview(BaseModel):
 
     class Meta:
         table_name = 'certificate_reviews'
+
+class BeautyPromoPost(BaseModel):
+    url = CharField(unique=True, max_length=512)
+    title = TextField()
+    content = TextField()
+    comments = TextField()
+
+    class Meta:
+        table_name = 'beauty_promo_posts'

@@ -143,5 +143,5 @@ def run_spider(kwd):
 
 
 if __name__ == '__main__':
-    kwd = '1인피부샵창업'
+    kwd = '올리브영리뷰'
     run_spider(kwd)

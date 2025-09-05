@@ -50,6 +50,7 @@ const UnifiedGeneratorPage: FC = () => {
                                 pageTitle={selectedConfig.pageTitle}
                                 topic={selectedConfig.topic}
                                 categoryName={selectedConfig.categoryName}
+                                enableComments={selectedConfig.enableComments}
                             />
                         ) : (
                             <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-center text-gray-400 h-full flex items-center justify-center border border-gray-700">

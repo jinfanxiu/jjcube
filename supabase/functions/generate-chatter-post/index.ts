@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import OpenAI from 'https://deno.land/x/openai@v4.52.7/mod.ts';
 import { corsHeaders } from '../_shared/cors.ts';
-import { prompts } from './prompts/index.ts'; // 분리된 프롬프트를 가져옵니다.
+import { prompts } from './prompts/index.ts';
 
 serve(async (req) => {
     if (req.method === 'OPTIONS') {
@@ -11,12 +11,29 @@ serve(async (req) => {
 
     try {
         const { topic } = await req.json();
-        if (!topic || !(topic in prompts)) {
+        const selectedPromptConfig = prompts[topic];
+
+        if (!topic || !selectedPromptConfig) {
             throw new Error(`'${topic}'은(는) 유효한 주제가 아닙니다.`);
         }
 
-        const tableIdentifier = topic === 'beauty' ? 'articles' : 'certificate_reviews';
-        const selectedPrompt = prompts[topic].system;
+        let tableIdentifier: string;
+        switch (topic) {
+            case 'beauty':
+                tableIdentifier = 'articles';
+                break;
+            case 'certificateReview':
+                tableIdentifier = 'certificate_reviews';
+                break;
+            case 'beautyPromoPost':
+                tableIdentifier = 'beauty_promo_posts';
+                break;
+            default:
+                throw new Error(`'${topic}'에 해당하는 테이블을 찾을 수 없습니다.`);
+        }
+
+        const selectedSystemPrompt = selectedPromptConfig.system;
+        const selectedModel = selectedPromptConfig.model || 'gpt-4o-mini';
 
         const supabaseAdmin = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
@@ -38,11 +55,15 @@ serve(async (req) => {
         const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY') });
         const userPrompt = `[제목] \n${sourceRecord.title || ''}\n[본문]\n${sourceRecord.content || ''}`;
 
+        console.log(`selectedModel: ${selectedModel}, selectedSystemPrompt: ${selectedSystemPrompt}, userPrompt: ${userPrompt}`);
         const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [{ role: "system", content: selectedPrompt }, { role: "user", content: userPrompt }],
-            temperature: 1.3,
-            top_p: 0.3,
+            model: selectedModel,
+            messages: [
+                { role: "system", content: selectedSystemPrompt },
+                { role: "user", content: userPrompt }
+            ],
+            // temperature: 1.3,
+            // top_p: 0.3,
         });
 
         const gptContent = response.choices[0].message.content || "";
