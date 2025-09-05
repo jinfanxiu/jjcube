@@ -32,10 +32,10 @@ const ToolboxPage: FC = () => {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <header className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white">
-                        AI 툴박스
+                        프리미엄 마케팅 시작
                     </h1>
                     <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                        필요한 AI 도구를 선택하여 작업을 시작하세요.
+                        <p>JJ뷰티아카데미 멤버만을 위한</p><p>프리미엄 마케팅 도구</p>
                     </p>
                 </header>
 
